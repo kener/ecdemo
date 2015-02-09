@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <script src="js/esl.js"></script>
+</head>
+
+<body>
+    <div id="main" style="height:500px;border:1px solid #ccc;padding:10px;"></div>
+    
+    <script type="text/javascript">
+    require.config({
+        paths:{ 
+            echarts:'./js/echarts-map',
+            'echarts/chart/bar': './js/echarts-map',
+            'echarts/chart/line': './js/echarts-map'
+        }
+    });
+    
+    // Step:4 require echarts and use it in the callback.
+    // Step:4 动态加载echarts然后在回调函数中开始使用，注意保持按需加载结构定义图表路径
+    require(
+        [
+            'echarts',
+            'js/theme/infographic',
+            'echarts/chart/bar',
+            'echarts/chart/line'
+        ],
+        function (ec, theme) {
+            //--- 折柱 ---
+            var myChart = ec.init(document.getElementById('main'), theme);
+            myChart.setOption({
+                timeline: {
+                    autoPlay: true,
+                    data: [
+                        '2008','2009','2010','2011','2012','2013'
+                    ]
+                },
+                options: [
+                    {
+                        tooltip: {
+                            trigger: 'axis',
+                            formatter: function(params) {
+                                var res = params[0][1] + '：';
+                                for (var i = 0, l = params.length; i < l; i++) {
+                                    res += '<br/>' + params[i][0] + ' ： ';
+                                    if (params[i][0].indexOf('信贷') != -1 
+                                        || params[i][0].indexOf('贸易') != -1
+                                    ) {
+                                        res +=  params[i][2] + ' 亿元';
+                                    }
+                                    else if (params[i][0].indexOf('CPI') != -1) {
+                                        res +=  ((params[i][2] - 46) / 8 + 1.2).toFixed(1) + '%'
+                                    }
+                                    else {
+                                        res +=  params[i][2];
+                                    }
+                                }
+                                return res;
+                            }
+                        },
+                        legend: {
+                            data:['新增信贷','贸易差额','官方PMI','汇丰PMI','CPI 增幅']
+                        },
+                        toolbox: {
+                            show: true,
+                            feature: {
+                                mark: {show: true},
+                                dataView: {show: true, readOnly: false},
+                                magicType: {show: true, type: ['line', 'bar']},
+                                restore: {show: true},
+                                saveAsImage: {show: true}
+                            }
+                        },
+                        grid: {
+                            y2: 80
+                        },
+                        xAxis: [
+                            {
+                                type: 'category',
+                                data: ['1月','2月','3月','4月','5月','6月','7月','8月'],
+                                axisLine: {
+                                    onZero: false
+                                }
+                            }
+                        ],
+                        yAxis: [
+                            {
+                                name: '亿元  ',
+                                nameTextStyle: {
+                                    align: 'right',
+                                    color: '#1e90ff'
+                                },
+                                type: 'value',
+                                splitNumber: 4,
+                                axisLine: {
+                                    show: true,
+                                    lineStyle: {
+                                        color: 'rgba(0,0,0,0)'
+                                    }
+                                }
+                            },
+                            {
+                                name: ' PMI   CPI',
+                                nameTextStyle: {
+                                    align: 'left',
+                                    color: '#1e90ff'
+                                },
+                                type: 'value',
+                                min: 46,
+                                max: 54,
+                                splitNumber: 8,
+                                axisLine: {
+                                    show: true,
+                                    lineStyle: {
+                                        color: 'rgba(0,0,0,0)'
+                                    }
+                                },
+                                axisLabel: {
+                                    formatter: function(v) {
+                                        return v + '    ' + ((v - 46)/8 + 1.2).toFixed(1) + '%'
+                                    }
+                                }
+                            }
+                        ],
+                        series: [
+                            {
+                                name: '新增信贷',
+                                type: 'bar',
+                                data: [13200,6445,10500,7747,8708,10800,3852,7025]
+                            },
+                            {
+                                name: '贸易差额',
+                                type: 'bar',
+                                data: [1958.88,-1415.568,474.32,1139.6,2211.44,1946.56,2913.68]
+                            },
+                            {
+                                name: '官方PMI',
+                                type: 'line',
+                                yAxisIndex: 1,
+                                data: [50.5,50.2,50.3,50.4,50.8,51,51.7]
+                            },
+                            {
+                                name: '汇丰PMI',
+                                type: 'line',
+                                yAxisIndex: 1,
+                                data: [49.5,48.5,48.1,48.1,49.4,50.7]
+                            },
+                            {
+                                name: 'CPI 增幅',
+                                type: 'line',
+                                yAxisIndex: 1,
+                                data: [52.5,50,52,49,52.5,51.5,51.5,50]
+                            }
+                        ]
+                    },
+                    // 2009
+                    {
+                        series: [
+                            {data: [14200,6545,11500,8747,9708,11800,4852,8025]},
+                            {data: [1758.88,-1215.468,474.32,1239.6,2311.44,1646.56,2813.68]},
+                            {data: [51.5,52.2,51.3,51.4,51.8,50,50.7]},
+                            {data: [50.5,49.5,49.1,49.1,50.4,51.7]},
+                            {data: [53.5,51,53,49,53.5,52.5,52.5,51]}
+                        ]
+                    },
+                    // 2010
+                    {
+                        series: [
+                            {data: [13200,6445,10500,7747,8708,10800,3852,7025]},
+                            {data: [1958.88,-1415.568,474.32,1139.6,2211.44,1946.56,2913.68]},
+                            {data: [50.5,50.2,50.3,50.4,50.8,51,51.7]},
+                            {data: [49.5,48.5,48.1,48.1,49.4,50.7]},
+                            {data: [52.5,50,52,49,52.5,51.5,51.5,50]}
+                        ]
+                    },
+                    // 2011
+                    {
+                        series: [
+                            {data: [14200,6545,11500,8747,9708,11800,4852,8025]},
+                            {data: [1758.88,-1215.468,474.32,1239.6,2311.44,1646.56,2813.68]},
+                            {data: [51.5,52.2,51.3,51.4,51.8,50,50.7]},
+                            {data: [50.5,49.5,49.1,49.1,50.4,51.7]},
+                            {data: [53.5,51,53,49,53.5,52.5,52.5,51]}
+                        ]
+                    },
+                    // 2012
+                    {
+                        series: [
+                            {data: [13200,6445,10500,7747,8708,10800,3852,7025]},
+                            {data: [1958.88,-1415.568,474.32,1139.6,2211.44,1946.56,2913.68]},
+                            {data: [50.5,50.2,50.3,50.4,50.8,51,51.7]},
+                            {data: [49.5,48.5,48.1,48.1,49.4,50.7]},
+                            {data: [52.5,50,52,49,52.5,51.5,51.5,50]}
+                        ]
+                    },
+                    // 2013
+                    {
+                        series: [
+                            {data: [14200,6545,11500,8747,9708,11800,4852,8025]},
+                            {data: [1758.88,-1215.468,474.32,1239.6,2311.44,1646.56,2813.68]},
+                            {data: [51.5,52.2,51.3,51.4,51.8,50,50.7]},
+                            {data: [50.5,49.5,49.1,49.1,50.4,51.7]},
+                            {data: [53.5,51,53,49,53.5,52.5,52.5,51]}
+                        ]
+                    }
+                ]
+            });
+            
+            window.onresize = function() {
+                myChart.resize();
+            }
+        }
+    );
+    </script>
+</body>
+</html>
