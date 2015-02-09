@@ -1,0 +1,707 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+   <script src="./libs/js/esl.js"></script>
+  <!-- jQuery -->
+  	<style type="text/css" title="currentStyle">
+		@import "./libs/css/demo_page.css";
+		@import "./libs/css/jquery.dataTables.css";
+	</style>
+		
+
+ 
+
+  <script src="./libs/js/jquery.min.js"></script>
+  <script src="./libs/js/jquery-ui.min.js"></script>
+
+   <script src="./libs/js/jquery"></script>
+  <script src="./libs/js/jquery.dataTables.js"></script>
+  <script type="text/javascript" charset="utf-8">
+			$(document).ready(function() {
+				$('#example').dataTable();
+			} );
+         
+  <!-- highlight.js -->
+  <link rel="stylesheet" href="./libs/vs.min.css">
+  <script src="./libs/js/highlight.min.js"></script>
+  <script src="./libs/js/r.min.js"></script>
+  
+  <!-- bootstrap -->
+  <link rel="stylesheet" type="text/css" href="./libs/css/bootstrap-combined.min.css" id="style" media="screen">
+  <script src="./libs/js/bootstrap.min.js"></script>
+  
+  <!-- bootstrap-responsive -->
+  <link rel="stylesheet" href="./libs/css/bootstrap-responsive.min.css" media="screen">
+  
+  <!-- tocify -->
+  <link rel="stylesheet" href="./libs/css/jquery.tocify.css">
+  <script src="./libs/js/jquery.tocify.min.js"></script>
+  
+  <!-- fancybox -->
+  <link rel="stylesheet" href="./libs/css/jquery.fancybox.css">
+  <script src="./libs/js/jquery.fancybox.js"></script>
+  
+  <script>
+  
+  /* run scripts when document is ready */
+  $(function() {
+  
+    /* size of thumbnails */
+    var thumbsize = "span4";
+  
+    /* included languages */
+    var languages = {};
+  
+    /* Add div wrapping class to code blocks without them */
+    $('pre code').each(function(){
+  
+      var block_type, code_type;
+      /* output block */
+      if($(this).hasClass('')){
+        block_type = "output";
+        code_type = "";
+      }
+      /* source code block */
+      else{
+        block_type = "source";
+        code_type = $(this).attr('class');
+      }
+      /* no wrapping div, not using render_html(), so add to wrap */
+      if($(this).closest('div').length < 1){
+        $(this).parent().wrap('<div class="' + [block_type, code_type].join(" ") + '"></div>');
+      }
+      /* just add code type to the parent div */
+      else{
+        $(this).closest('div').addClass(code_type);
+      }
+    });
+  
+    /* style tables, set them as output*/
+    $('table').addClass('table table-striped table-bordered table-hover table-condensed')
+      .wrap('<div class="output", style="overflow: auto"/>');
+  
+    /* find all code or output blocks which have a class and add toggle */
+    $('div.source, div.output').each(function() {
+      var button = $('<button class="btn-mini btn-link btn toggle " data-toggle="button">+/- </button>');
+  
+      /* code block */
+      if($(this).hasClass('source')){
+        var code_block = $(this).find('code');
+        var lang_type = code_block.attr('class');
+        button.text(button.text() + lang_type + ' Code');
+        button.addClass('source ' + lang_type);
+        languages[lang_type]=1;
+        code_block.each(function(i, e) {
+          hljs.highlightBlock(e);
+        });
+      }
+  
+      /* output block */
+      else {
+        button.text(button.text() + 'Output');
+        button.addClass('output active');
+      }
+      $(this).before(button);
+    });
+  
+    /* syntax highlight code blocks*/
+  
+    /* onclick toggle next code block */
+    $('.toggle').click(function() {
+      $(this).button('toggle');
+      $(this).next('div').slideToggle();
+      return false;
+    });
+  
+    /* give images a fancybox and thumbnail classes to allow lightbox and thumbnails TODO: make fancybox prev next if grouped */
+    $('p').each(function(){
+      $(this).find('img').unwrap().wrapAll('<div class="row-fluid"><div class="rimage thumbnails"></div></div>');
+    });
+    $('div.rimage').children('img').wrap('<a href="#", class="' + thumbsize + ' thumbnail"></a></li>').addClass('fancybox');
+  
+    /* fancybox */
+    $(".fancybox").each( function() {
+      var img = $(this);
+      $(this).fancybox({
+        beforeLoad: function(){
+          <!--img.removeClass('thumbnail');-->
+        },
+        afterClose: function(){
+          <!--img.addClass('thumbnail');-->
+          img.css('display', 'block');
+        },
+      });
+    });
+  
+    /* add bootstrap classes */
+    $('body').wrapInner('<div class="container-fluid"><div class="row-fluid"><div class="span9">');
+    $('.container-fluid >.row-fluid').prepend('<div class="span3"><div id="toc"></div></div>');
+  
+    create_language_links = function(){
+      var text='';
+      for(language in languages){
+        text += '<li><a href="#" class="source toggle_global btn-link btn" type="source.' + language + '">' + language + '</a></li>\n';
+      }
+      return text;
+    }
+  
+    /* add navbar */
+    $('.container-fluid').prepend(
+      '<div id="bottom-navbar" class="navbar-fixed-bottom navbar">\
+        <div class="navbar-inner">\
+          <div class="pull-right">\
+            <span class="navbar-text">Toggle</span>\
+            <div class="btn-group dropup" data-toggle="button-checkbox">\
+              <button type="source" class="toggle_global btn">Code</button>\
+              <button class="btn dropdown-toggle" data-toggle="dropdown">\
+                <span class="caret"></span>\
+              </button>\
+              <ul class="dropdown-menu pull-right">' 
+                + create_language_links() + 
+              '</div>\
+              <button type="output" class="toggle_global btn active">Output</button>\
+              <button type="thumbnails" class="toggle_global btn active">Plots</button>\
+            </div>\
+          </div>\
+        </div>\
+      </div>'
+    );
+  
+    /* global toggles FIXME explicitly toggle all on/off using global variables */
+    $('.toggle_global').click(function(){
+      $(this).button('toggle');
+      var type = $(this).attr('type');
+      $('.' + type).button('toggle');
+      $('div.' + type).slideToggle();
+      return false;
+    });
+  
+    /* toggle code blocks hidden by default */
+    $('div.source').toggle();
+  
+    /* add table of contents */
+    $('#toc').tocify({extendPage: false});
+  
+    /* if using render_html() hook, make functions links to custom R search */
+    /*search in ggplot documentation or inside-r.org */
+    $("span.functioncall").replaceWith(function(){
+  
+      return '<a target="_blank" href="http://www.google.com/search?sourceid=navclient&gfns=1&\
+  q=site:docs.ggplot2.org/current OR site:inside-r.org ' +
+      $(this).text() + '">' + $(this).text()+'</a>'
+    });
+  
+    /* add footer */
+    $('body').wrapInner('<div id="wrap" />');
+    $('body').append('<div id="push" />');
+    var p = $('p:contains("Author:")');
+    var last_p = p.filter(':last');
+    p.detach();
+    last_p.addClass('muted').attr('id','credit');
+    last_p.append('<p>styled with <a href="https://github.com/jimhester/knitr_bootstrap">knitr_bootstrap</a></p>');
+    last_p.appendTo("body");
+    last_p.wrap('<div id="footer"><div class="container" /></div>');
+  });
+  </script>
+  
+  <style type="text/css">
+  
+  /* Knitr_bootstrap styles
+  -------------------------------------------------- */
+  .container-fluid {
+    padding-left: 0 !important;
+  }
+  
+  .toggle{
+    text-transform: capitalize;
+  }
+  
+  .toggle_global{
+    text-transform: capitalize;
+  }
+  
+  .thumbnails { text-align:center; }
+  .thumbnails > .thumbnail { display: inline-block !important; float: none !important; }
+  
+  /* Sticky footer styles
+  -------------------------------------------------- */
+  * {
+    margin:0;
+  }
+  html,
+  body {
+      height: 100%;
+      /* The html and body elements cannot have any padding or margin. */
+  }
+  
+  /* Wrapper for page content to push down footer */
+  #wrap {
+      min-height: 100%;
+      height: auto !important;
+      height: 100%;
+      /* Negative indent footer by it's height */
+      margin: 0 auto -60px;
+  }
+  
+  /* Set the fixed height of the footer here */
+  #push,
+  #footer {
+      height: 60px;
+      padding-bottom: 60px;
+  }
+  
+  #footer {
+    text-align: center;
+  }
+  
+  /* Twitter Bootstrap Overrides */
+  /* -------------------------------------------------- */
+  .nav-list > li > a, .nav-list .nav-header {
+      margin: 0px !important;
+  }
+  .nav-list > li > a {
+      padding: 5px !important;
+  }
+  
+  /* Tocify */
+  /* -------------------------------------------------- */
+  
+  /* Display h2 headers */
+  .sub-header {
+    display: block;
+  }
+  
+  /* Hide the rest */
+  .sub-header .sub-header {
+    display: none;
+  }
+  
+   /* Indent h4 elements */
+  .sub-header .sub-header .sub-header .sub-header {
+    text-indent: 50px;
+  }
+  
+  </style>
+  
+  <link rel="stylesheet" type="text/css" href="./libs/css/bootstrap-combined.min.css" id="style" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/bootstrap-combined.min.css" id="style" title="default" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/amelia/bootstrap.min.css" title="amelia" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/cerulean/bootstrap.min.css" title="cerulean" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/cosmo/bootstrap.min.css" title="cosmo" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/cyborg/bootstrap.min.css" title="cyborg" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/journal/bootstrap.min.css" title="journal" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/readable/bootstrap.min.css" title="readable" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/simplex/bootstrap.min.css" title="simplex" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/2.3.1/slate/bootstrap.min.css" title="slate" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/spacelab/bootstrap.min.css" title="spacelab" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/spruce/bootstrap.min.css" title="spruce" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/superhero/bootstrap.min.css" title="superhero" media="screen">
+  <link rel="alternate stylesheet" type="text/css" href="./libs/css/boot-styles/united/bootstrap.min.css" title="united" media="screen">
+  
+  <script>
+  $(function() {
+      $('#bottom-navbar').find('.navbar-inner').append(
+      '<ul class="nav">\
+        <li class="dropdown">\
+          <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">选择网页样式</a>\
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">\
+            <li><a class="style-switch" id="default" href="#">default</a></li>\
+            <li><a class="style-switch" id="amelia" href="#">amelia</a></li>\
+            <li><a class="style-switch" id="cerulean" href="#">cerulean</a></li>\
+            <li><a class="style-switch" id="cosmo" href="#">cosmo</a></li>\
+            <li><a class="style-switch" id="cyborg" href="#">cyborg</a></li>\
+            <li><a class="style-switch" id="journal" href="#">journal</a></li>\
+            <li><a class="style-switch" id="readable" href="#">readable</a></li>\
+            <li><a class="style-switch" id="simplex" href="#">simplex</a></li>\
+            <li><a class="style-switch" id="slate" href="#">slate</a></li>\
+            <li><a class="style-switch" id="spacelab" href="#">spacelab</a></li>\
+            <li><a class="style-switch" id="spruce" href="#">spruce</a></li>\
+            <li><a class="style-switch" id="superhero" href="#">superhero</a></li>\
+            <li><a class="style-switch" id="united" href="#">united</a></li>\
+          </ul>\
+        </li>\
+      </ul>');
+      $('.style-switch').click(function(){
+        var css = $('link[title=' + $(this).attr('id') + ']');
+        $('#style[rel=stylesheet]').attr('href', css.attr('href'));
+        return false;
+      });
+    }
+  );
+  </script>
+  
+  <link id="code-style" rel="stylesheet" href="./libs/css/code-styles/vs.min.css">
+  <link rel="alternate stylesheet" title="Default" href="./libs/css/code-styles/default.min.css">
+  <link rel="alternate stylesheet" title="Dark" href="./libs/css/code-styles/dark.min.css">
+  <link rel="alternate stylesheet" title="FAR" href="./libs/css/code-styles/far.min.css">
+  <link rel="alternate stylesheet" title="IDEA" href="./libs/css/code-styles/idea.min.css">
+  <link rel="alternate stylesheet" title="Sunburst" href="./libs/css/code-styles/sunburst.min.css">
+  <link rel="alternate stylesheet" title="Zenburn" href="./libs/css/code-styles/zenburn.min.css">
+  <link rel="alternate stylesheet" title="Visual Studio" href="./libs/css/code-styles/styles/vs.min.css">
+  <link rel="alternate stylesheet" title="Ascetic" href="./libs/css/code-styles/ascetic.min.css">
+  <link rel="alternate stylesheet" title="Magula" href="./libs/css/code-styles/magula.min.css">
+  <link rel="alternate stylesheet" title="GitHub" href="./libs/css/code-styles/github.min.css">
+  <link rel="alternate stylesheet" title="Google Code" href="./libs/css/code-styles/googlecode.min.css">
+  <link rel="alternate stylesheet" title="Brown Paper" href="./libs/css/code-styles/brown_paper.min.css">
+  <link rel="alternate stylesheet" title="School Book" href="./libs/css/code-styles/school_book.min.css">
+  <link rel="alternate stylesheet" title="IR Black" href="./libs/css/code-styles/ir_black.min.css">
+  <link rel="alternate stylesheet" title="Solarized - Dark" href="./libs/css/code-styles/solarized_dark.min.css">
+  <link rel="alternate stylesheet" title="Solarized - Light" href="./libs/css/code-styles/solarized_light.min.css">
+  <link rel="alternate stylesheet" title="Arta" href="./libs/css/code-styles/arta.min.css">
+  <link rel="alternate stylesheet" title="Monokai" href="./libs/css/code-styles/monokai.min.css">
+  <link rel="alternate stylesheet" title="XCode" href="./libs/css/code-styles/xcode.min.css">
+  <link rel="alternate stylesheet" title="Pojoaque" href="./libs/css/code-styles/pojoaque.min.css">
+  <link rel="alternate stylesheet" title="Rainbow" href="./libs/css/code-styles/rainbow.min.css">
+  <link rel="alternate stylesheet" title="Tomorrow" href="./libs/css/code-styles/tomorrow.min.css">
+  <link rel="alternate stylesheet" title="Tomorrow Night" href="./libs/css/code-styles/tomorrow-night.min.css">
+  <link rel="alternate stylesheet" title="Tomorrow Night Bright" href="./libs/css/code-styles/tomorrow-night-bright.min.css">
+  <link rel="alternate stylesheet" title="Tomorrow Night Blue" href="./libs/css/code-styles/tomorrow-night-blue.min.css">
+  <link rel="alternate stylesheet" title="Tomorrow Night Eighties" href="./libs/css/code-styles/tomorrow-night-eighties.min.css">
+  
+  <script>
+  $(function() {
+      $('#bottom-navbar').find('.navbar-inner').append(
+      '<ul class="nav">\
+        <li class="dropdown">\
+          <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">选择代码风格</a>\
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">\
+            <li><a class="code-style-switch" title="Default" href="#">Default</a></li>\
+            <li><a class="code-style-switch" title="Dark" href="#">Dark</a></li>\
+            <li><a class="code-style-switch" title="FAR" href="#">FAR</a></li>\
+            <li><a class="code-style-switch" title="IDEA" href="#">IDEA</a></li>\
+            <li><a class="code-style-switch" title="Sunburst" href="#">Sunburst</a></li>\
+            <li><a class="code-style-switch" title="Zenburn" href="#">Zenburn</a></li>\
+            <li><a class="code-style-switch" title="Visual Studio" href="#">Visual Studio</a></li>\
+            <li><a class="code-style-switch" title="Ascetic" href="#">Ascetic</a></li>\
+            <li><a class="code-style-switch" title="Magula" href="#">Magula</a></li>\
+            <li><a class="code-style-switch" title="GitHub" href="#">GitHub</a></li>\
+            <li><a class="code-style-switch" title="Google Code" href="#">Google Code</a></li>\
+            <li><a class="code-style-switch" title="Brown Paper" href="#">Brown Paper</a></li>\
+            <li><a class="code-style-switch" title="School Book" href="#">School Book</a></li>\
+            <li><a class="code-style-switch" title="IR Black" href="#">IR Black</a></li>\
+            <li><a class="code-style-switch" title="Solarized - Dark" href="#">Solarized - Dark</a></li>\
+            <li><a class="code-style-switch" title="Solarized - Light" href="#">Solarized - Light</a></li>\
+            <li><a class="code-style-switch" title="Arta" href="#">Arta</a></li>\
+            <li><a class="code-style-switch" title="Monokai" href="#">Monokai</a></li>\
+            <li><a class="code-style-switch" title="XCode" href="#">XCode</a></li>\
+            <li><a class="code-style-switch" title="Pojoaque" href="#">Pojoaque</a></li>\
+            <li><a class="code-style-switch" title="Rainbow" href="#">Rainbow</a></li>\
+            <li><a class="code-style-switch" title="Tomorrow" href="#">Tomorrow</a></li>\
+            <li><a class="code-style-switch" title="Tomorrow Night" href="#">Tomorrow Night</a></li>\
+            <li><a class="code-style-switch" title="Tomorrow Night Bright" href="#">Tomorrow Night Bright</a></li>\
+            <li><a class="code-style-switch" title="Tomorrow Night Blue" href="#">Tomorrow Night Blue</a></li>\
+            <li><a class="code-style-switch" title="Tomorrow Night Eighties" href="#">Tomorrow Night Eighties</a></li>\
+          </ul>\
+        </li>\
+      </ul>');
+      $('.code-style-switch').click(function(){
+        var css = $('link[title="' + $(this).attr('title') + '"]');
+        $('#code-style[rel=stylesheet]').attr('href', css.attr('href'));
+  
+        return false;
+      });
+  });
+  </script>
+  
+  
+  <style type="text/css">
+  /* customize style */
+    body{font-size:18px; line-height: 30px; padding:20px}
+    body{font-family:"微软雅黑"}
+    h1{font-size: 32px}
+    /* h1{font-family:"微软雅黑"} */
+    h2{font-size: 26px}
+    code, pre{font-size: 18px}
+    a.code-style-switch{font-size: 14px}
+    
+    .caption-text{
+  font-size: 100%;
+  font-family:"微软雅黑";
+  margin: 0;
+  padding: 6px 3px 2px;
+  line-height: 16px;
+  text-align: center;
+  }
+  
+  
+  </style>
+</head>
+
+
+<body>
+        <!--Step:2 Prepare a dom for ECharts which (must) has size (width & hight)-->
+        <!--Step:2 为ECharts准备一个具备大小（宽高）的Dom-->
+        <h1>啦啦啦 </h1>
+        <div id="main1" style="height:500px;border:1px solid #ccc;padding:10px;">
+        </div>
+        <h1>哦哦哦</h1>
+        <div id="main2" style="height:500px;border:1px solid #ccc;padding:10px;">
+        </div>
+        <h1>呱呱呱</h1>
+        <div id="main3" style="height:500px;border:1px solid #ccc;padding:10px;">
+        </div>
+        <script type="text/javascript">
+            // Step:3 conifg ECharts's path, link to echarts.js from current page.
+            // Step:3 为模块加载器配置echarts的路径，从当前页面链接到echarts.js，定义所需图表路径
+            require.config({
+                paths: {
+                    echarts: './libs/js/echarts',
+                    'echarts/chart/bar': './libs/js/echarts',
+                    'echarts/chart/line': './libs/js/echarts',
+                    'echarts/chart/scatter': './libs/js/echarts'
+                }
+            });
+
+            // Step:4 require echarts and use it in the callback.
+            // Step:4 动态加载echarts然后在回调函数中开始使用，注意保持按需加载结构定义图表路径
+            require(['echarts', 'echarts/chart/bar', 'echarts/chart/line', 'echarts/chart/scatter'],
+            function(ec) {
+                var myChart1 = ec.init(document.getElementById('main1'));
+                var myChart2 = ec.init(document.getElementById('main2'));
+                var myChart3 = ec.init(document.getElementById('main3'));
+                var option1 = {
+                    title: {
+                        text: '2010至今FCINDEX指数变化(2010~2013)'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['FCINDEX-XL', 'FCINDEX-XM', 'FCINDEX-XS']
+                    },
+                    toolbox: {
+                        show: false
+                    },
+                    calculable: true,
+                    dataZoom: {
+                        show: true,
+                        realtime: true,
+                        //start : 1,
+                        //end : 10
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ["2010-1-4", "2010-1-5", "2010-1-6", "2010-1-7", "2010-1-8", "2010-1-11", "2010-1-12", "2010-1-13", "2010-1-14", "2010-1-15", "2010-1-18", "2010-1-19", "2010-1-20", "2010-1-21", "2010-1-22", "2010-1-25", "2010-1-26", "2010-1-27", "2010-1-28", "2010-1-29", "2010-2-1", "2010-2-2", "2010-2-3", "2010-2-4", "2010-2-5", "2010-2-8", "2010-2-9", "2010-2-10", "2010-2-11", "2010-2-12", "2010-2-20", "2010-2-21", "2010-2-22", "2010-2-23", "2010-2-24", "2010-2-25", "2010-2-26", "2010-3-1", "2010-3-2", "2010-3-3", "2010-3-4", "2010-3-5", "2010-3-8", "2010-3-9", "2010-3-10", "2010-3-11", "2010-3-12", "2010-3-15", "2010-3-16", "2010-3-17", "2010-3-18", "2010-3-19", "2010-3-22", "2010-3-23", "2010-3-24", "2010-3-25", "2010-3-26", "2010-3-29", "2010-3-30", "2010-3-31", "2010-4-1", "2010-4-2", "2010-4-6", "2010-4-7", "2010-4-8", "2010-4-9", "2010-4-12", "2010-4-13", "2010-4-14", "2010-4-15", "2010-4-16", "2010-4-19", "2010-4-20", "2010-4-21", "2010-4-22", "2010-4-23", "2010-4-26", "2010-4-27", "2010-4-28", "2010-4-29", "2010-4-30", "2010-5-4", "2010-5-5", "2010-5-6", "2010-5-7", "2010-5-10", "2010-5-11", "2010-5-12", "2010-5-13", "2010-5-14", "2010-5-17", "2010-5-18", "2010-5-19", "2010-5-20", "2010-5-21", "2010-5-24", "2010-5-25", "2010-5-26", "2010-5-27", "2010-5-28", "2010-5-31", "2010-6-1", "2010-6-2", "2010-6-3", "2010-6-4", "2010-6-7", "2010-6-8", "2010-6-9", "2010-6-10", "2010-6-11", "2010-6-12", "2010-6-13", "2010-6-17", "2010-6-18", "2010-6-21", "2010-6-22", "2010-6-23", "2010-6-24", "2010-6-25", "2010-6-28", "2010-6-29", "2010-6-30", "2010-7-1", "2010-7-2", "2010-7-5", "2010-7-6", "2010-7-7", "2010-7-8", "2010-7-9", "2010-7-12", "2010-7-13", "2010-7-14", "2010-7-15", "2010-7-16", "2010-7-19", "2010-7-20", "2010-7-21", "2010-7-22", "2010-7-23", "2010-7-26", "2010-7-27", "2010-7-28", "2010-7-29", "2010-7-30", "2010-8-2", "2010-8-3", "2010-8-4", "2010-8-5", "2010-8-6", "2010-8-9", "2010-8-10", "2010-8-11", "2010-8-12", "2010-8-13", "2010-8-16", "2010-8-17", "2010-8-18", "2010-8-19", "2010-8-20", "2010-8-23", "2010-8-24", "2010-8-25", "2010-8-26", "2010-8-27", "2010-8-30", "2010-8-31", "2010-9-1", "2010-9-2", "2010-9-3", "2010-9-6", "2010-9-7", "2010-9-8", "2010-9-9", "2010-9-10", "2010-9-13", "2010-9-14", "2010-9-15", "2010-9-16", "2010-9-17", "2010-9-19", "2010-9-20", "2010-9-21", "2010-9-25", "2010-9-26", "2010-9-27", "2010-9-28", "2010-9-29", "2010-9-30", "2010-10-8", "2010-10-9", "2010-10-11", "2010-10-12", "2010-10-13", "2010-10-14", "2010-10-15", "2010-10-18", "2010-10-19", "2010-10-20", "2010-10-21", "2010-10-22", "2010-10-25", "2010-10-26", "2010-10-27", "2010-10-28", "2010-10-29", "2010-11-1", "2010-11-2", "2010-11-3", "2010-11-4", "2010-11-5", "2010-11-8", "2010-11-9", "2010-11-10", "2010-11-11", "2010-11-12", "2010-11-15", "2010-11-16", "2010-11-17", "2010-11-18", "2010-11-19", "2010-11-22", "2010-11-23", "2010-11-24", "2010-11-25", "2010-11-26", "2010-11-29", "2010-11-30", "2010-12-1", "2010-12-2", "2010-12-3", "2010-12-6", "2010-12-7", "2010-12-8", "2010-12-9", "2010-12-10", "2010-12-13", "2010-12-14", "2010-12-15", "2010-12-16", "2010-12-17", "2010-12-20", "2010-12-21", "2010-12-22", "2010-12-23", "2010-12-24", "2010-12-27", "2010-12-28", "2010-12-29", "2010-12-30", "2010-12-31", "2011-1-4", "2011-1-5", "2011-1-6", "2011-1-7", "2011-1-10", "2011-1-11", "2011-1-12", "2011-1-13", "2011-1-14", "2011-1-17", "2011-1-18", "2011-1-19", "2011-1-20", "2011-1-21", "2011-1-24", "2011-1-25", "2011-1-26", "2011-1-27", "2011-1-28", "2011-1-30", "2011-1-31", "2011-2-1", "2011-2-9", "2011-2-10", "2011-2-11", "2011-2-12", "2011-2-14", "2011-2-15", "2011-2-16", "2011-2-17", "2011-2-18", "2011-2-21", "2011-2-22", "2011-2-23", "2011-2-24", "2011-2-25", "2011-2-28", "2011-3-1", "2011-3-2", "2011-3-3", "2011-3-4", "2011-3-7", "2011-3-8", "2011-3-9", "2011-3-10", "2011-3-11", "2011-3-14", "2011-3-15", "2011-3-16", "2011-3-17", "2011-3-18", "2011-3-21", "2011-3-22", "2011-3-23", "2011-3-24", "2011-3-25", "2011-3-28", "2011-3-29", "2011-3-30", "2011-3-31", "2011-4-1", "2011-4-2", "2011-4-6", "2011-4-7", "2011-4-8", "2011-4-11", "2011-4-12", "2011-4-13", "2011-4-14", "2011-4-15", "2011-4-18", "2011-4-19", "2011-4-20", "2011-4-21", "2011-4-22", "2011-4-25", "2011-4-26", "2011-4-27", "2011-4-28", "2011-4-29", "2011-5-3", "2011-5-4", "2011-5-5", "2011-5-6", "2011-5-9", "2011-5-10", "2011-5-11", "2011-5-12", "2011-5-13", "2011-5-16", "2011-5-17", "2011-5-18", "2011-5-19", "2011-5-20", "2011-5-23", "2011-5-24", "2011-5-25", "2011-5-26", "2011-5-27", "2011-5-30", "2011-5-31", "2011-6-1", "2011-6-2", "2011-6-3", "2011-6-7", "2011-6-8", "2011-6-9", "2011-6-10", "2011-6-13", "2011-6-14", "2011-6-15", "2011-6-16", "2011-6-17", "2011-6-20", "2011-6-21", "2011-6-22", "2011-6-23", "2011-6-24", "2011-6-27", "2011-6-28", "2011-6-29", "2011-6-30", "2011-7-1", "2011-7-4", "2011-7-5", "2011-7-6", "2011-7-7", "2011-7-8", "2011-7-11", "2011-7-12", "2011-7-13", "2011-7-14", "2011-7-15", "2011-7-18", "2011-7-19", "2011-7-20", "2011-7-21", "2011-7-22", "2011-7-25", "2011-7-26", "2011-7-27", "2011-7-28", "2011-7-29", "2011-8-1", "2011-8-2", "2011-8-3", "2011-8-4", "2011-8-5", "2011-8-8", "2011-8-9", "2011-8-10", "2011-8-11", "2011-8-12", "2011-8-15", "2011-8-16", "2011-8-17", "2011-8-18", "2011-8-19", "2011-8-22", "2011-8-23", "2011-8-24", "2011-8-25", "2011-8-26", "2011-8-29", "2011-8-30", "2011-8-31", "2011-9-1", "2011-9-2", "2011-9-5", "2011-9-6", "2011-9-7", "2011-9-8", "2011-9-9", "2011-9-13", "2011-9-14", "2011-9-15", "2011-9-16", "2011-9-19", "2011-9-20", "2011-9-21", "2011-9-22", "2011-9-23", "2011-9-26", "2011-9-27", "2011-9-28", "2011-9-29", "2011-9-30", "2011-10-8", "2011-10-9", "2011-10-10", "2011-10-11", "2011-10-12", "2011-10-13", "2011-10-14", "2011-10-17", "2011-10-18", "2011-10-19", "2011-10-20", "2011-10-21", "2011-10-24", "2011-10-25", "2011-10-26", "2011-10-27", "2011-10-28", "2011-10-31", "2011-11-1", "2011-11-2", "2011-11-3", "2011-11-4", "2011-11-7", "2011-11-8", "2011-11-9", "2011-11-10", "2011-11-11", "2011-11-14", "2011-11-15", "2011-11-16", "2011-11-17", "2011-11-18", "2011-11-21", "2011-11-22", "2011-11-23", "2011-11-24", "2011-11-25", "2011-11-28", "2011-11-29", "2011-11-30", "2011-12-1", "2011-12-2", "2011-12-5", "2011-12-6", "2011-12-7", "2011-12-8", "2011-12-9", "2011-12-12", "2011-12-13", "2011-12-14", "2011-12-15", "2011-12-16", "2011-12-19", "2011-12-20", "2011-12-21", "2011-12-22", "2011-12-23", "2011-12-26", "2011-12-27", "2011-12-28", "2011-12-29", "2011-12-30", "2011-12-31", "2012-1-4", "2012-1-5", "2012-1-6", "2012-1-9", "2012-1-10", "2012-1-11", "2012-1-12", "2012-1-13", "2012-1-16", "2012-1-17", "2012-1-18", "2012-1-19", "2012-1-20", "2012-1-21", "2012-1-29", "2012-1-30", "2012-1-31", "2012-2-1", "2012-2-2", "2012-2-3", "2012-2-6", "2012-2-7", "2012-2-8", "2012-2-9", "2012-2-10", "2012-2-13", "2012-2-14", "2012-2-15", "2012-2-16", "2012-2-17", "2012-2-20", "2012-2-21", "2012-2-22", "2012-2-23", "2012-2-24", "2012-2-27", "2012-2-28", "2012-2-29", "2012-3-1", "2012-3-2", "2012-3-5", "2012-3-6", "2012-3-7", "2012-3-8", "2012-3-9", "2012-3-12", "2012-3-13", "2012-3-14", "2012-3-15", "2012-3-16", "2012-3-19", "2012-3-20", "2012-3-21", "2012-3-22", "2012-3-23", "2012-3-26", "2012-3-27", "2012-3-28", "2012-3-29", "2012-3-30", "2012-3-31", "2012-4-1", "2012-4-5", "2012-4-6", "2012-4-9", "2012-4-10", "2012-4-11", "2012-4-12", "2012-4-13", "2012-4-16", "2012-4-17", "2012-4-18", "2012-4-19", "2012-4-20", "2012-4-23", "2012-4-24", "2012-4-25", "2012-4-26", "2012-4-27", "2012-4-28", "2012-5-2", "2012-5-3", "2012-5-4", "2012-5-7", "2012-5-8", "2012-5-9", "2012-5-10", "2012-5-11", "2012-5-14", "2012-5-15", "2012-5-16", "2012-5-17", "2012-5-18", "2012-5-21", "2012-5-22", "2012-5-23", "2012-5-24", "2012-5-25", "2012-5-28", "2012-5-29", "2012-5-30", "2012-5-31", "2012-6-1", "2012-6-4", "2012-6-5", "2012-6-6", "2012-6-7", "2012-6-8", "2012-6-11", "2012-6-12", "2012-6-13", "2012-6-14", "2012-6-15", "2012-6-18", "2012-6-19", "2012-6-20", "2012-6-21", "2012-6-25", "2012-6-26", "2012-6-27", "2012-6-28", "2012-6-29", "2012-7-2", "2012-7-3", "2012-7-4", "2012-7-5", "2012-7-6", "2012-7-9", "2012-7-10", "2012-7-11", "2012-7-12", "2012-7-13", "2012-7-16", "2012-7-17", "2012-7-18", "2012-7-19", "2012-7-20", "2012-7-23", "2012-7-24", "2012-7-25", "2012-7-26", "2012-7-27", "2012-7-30", "2012-7-31", "2012-8-1", "2012-8-2", "2012-8-3", "2012-8-6", "2012-8-7", "2012-8-8", "2012-8-9", "2012-8-10", "2012-8-13", "2012-8-14", "2012-8-15", "2012-8-16", "2012-8-17", "2012-8-20", "2012-8-21", "2012-8-22", "2012-8-23", "2012-8-24", "2012-8-27", "2012-8-28", "2012-8-29", "2012-8-30", "2012-8-31", "2012-9-3", "2012-9-4", "2012-9-5", "2012-9-6", "2012-9-7", "2012-9-10", "2012-9-11", "2012-9-12", "2012-9-13", "2012-9-14", "2012-9-17", "2012-9-18", "2012-9-19", "2012-9-20", "2012-9-21", "2012-9-24", "2012-9-25", "2012-9-26", "2012-9-27", "2012-9-28", "2012-9-29", "2012-10-8", "2012-10-9", "2012-10-10", "2012-10-11", "2012-10-12", "2012-10-15", "2012-10-16", "2012-10-17", "2012-10-18", "2012-10-19", "2012-10-22", "2012-10-23", "2012-10-24", "2012-10-25", "2012-10-26", "2012-10-29", "2012-10-30", "2012-10-31", "2012-11-1", "2012-11-2", "2012-11-5", "2012-11-6", "2012-11-7", "2012-11-8", "2012-11-9", "2012-11-12", "2012-11-13", "2012-11-14", "2012-11-15", "2012-11-16", "2012-11-19", "2012-11-20", "2012-11-21", "2012-11-22", "2012-11-23", "2012-11-26", "2012-11-27", "2012-11-28", "2012-11-29", "2012-11-30", "2012-12-3", "2012-12-4", "2012-12-5", "2012-12-6", "2012-12-7", "2012-12-10", "2012-12-11", "2012-12-12", "2012-12-13", "2012-12-14", "2012-12-17", "2012-12-18", "2012-12-19", "2012-12-20", "2012-12-21", "2012-12-24", "2012-12-25", "2012-12-26", "2012-12-27", "2012-12-28", "2012-12-31", "2013-1-4", "2013-1-5", "2013-1-6", "2013-1-7", "2013-1-8", "2013-1-9", "2013-1-10", "2013-1-11", "2013-1-14", "2013-1-15", "2013-1-16", "2013-1-17", "2013-1-18", "2013-1-21", "2013-1-22", "2013-1-23", "2013-1-24", "2013-1-25", "2013-1-28", "2013-1-29", "2013-1-30", "2013-1-31", "2013-2-1", "2013-2-4", "2013-2-5", "2013-2-6", "2013-2-7", "2013-2-8", "2013-2-16", "2013-2-17", "2013-2-18", "2013-2-19", "2013-2-20", "2013-2-21", "2013-2-22", "2013-2-25", "2013-2-26", "2013-2-27", "2013-2-28", "2013-3-1", "2013-3-4", "2013-3-5", "2013-3-6", "2013-3-7", "2013-3-8", "2013-3-11", "2013-3-12", "2013-3-13", "2013-3-14", "2013-3-15", "2013-3-18", "2013-3-19", "2013-3-20", "2013-3-21", "2013-3-22", "2013-3-25", "2013-3-26", "2013-3-27", "2013-3-28", "2013-3-29", "2013-4-1", "2013-4-2", "2013-4-3", "2013-4-7", "2013-4-8", "2013-4-9", "2013-4-10", "2013-4-11", "2013-4-12", "2013-4-15", "2013-4-16", "2013-4-17", "2013-4-18", "2013-4-19", "2013-4-22", "2013-4-23", "2013-4-24", "2013-4-25", "2013-4-26", "2013-4-27", "2013-4-28", "2013-5-2", "2013-5-3", "2013-5-6", "2013-5-7", "2013-5-8", "2013-5-9", "2013-5-10", "2013-5-13", "2013-5-14", "2013-5-15", "2013-5-16", "2013-5-17", "2013-5-20", "2013-5-21", "2013-5-22", "2013-5-23", "2013-5-24", "2013-5-27", "2013-5-28", "2013-5-29", "2013-5-30", "2013-5-31", "2013-6-3", "2013-6-4", "2013-6-5", "2013-6-6", "2013-6-7", "2013-6-8", "2013-6-9", "2013-6-13", "2013-6-14", "2013-6-17", "2013-6-18", "2013-6-19", "2013-6-20", "2013-6-21", "2013-6-24", "2013-6-25", "2013-6-26", "2013-6-27", "2013-6-28", "2013-7-1", "2013-7-2", "2013-7-3", "2013-7-4", "2013-7-5", "2013-7-8", "2013-7-9", "2013-7-10", "2013-7-11", "2013-7-12", "2013-7-15", "2013-7-16", "2013-7-17", "2013-7-18", "2013-7-19", "2013-7-22", "2013-7-23", "2013-7-24", "2013-7-25", "2013-7-26", "2013-7-29", "2013-7-30", "2013-7-31", "2013-8-1", "2013-8-2", "2013-8-5", "2013-8-6", "2013-8-7", "2013-8-8", "2013-8-9", "2013-8-12", "2013-8-13", "2013-8-14", "2013-8-15", "2013-8-16", "2013-8-19", "2013-8-20", "2013-8-21"]
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        axisLabel: {
+                            formatter: '{value} '
+                        },
+                        splitArea: {
+                            show: true
+                        }
+                    }],
+                    series: [{
+                        name: 'FCINDEX-XL',
+                        type: 'line',
+                        itemStyle: {
+                            normal: {
+                                lineStyle: {
+                                    shadowColor: 'rgba(0,0,0,0.4)'
+                                }
+                            }
+                        },
+                        data: [80.33, 80.64, 77.88, 78.31, 78.04, 77.81, 78.89, 78.19, 78.58, 78.28, 77.58, 77.58, 77.26, 76.6, 77.39, 76.9, 75.91, 75.91, 75.58, 75.58, 75.38, 74.82, 75.58, 76.13, 75.64, 74.66, 76.54, 78.47, 78.88, 78.96, 82.69, 82.69, 82.69, 83.74, 83.74, 83.14, 84.02, 84.16, 84.91, 83.99, 84.91, 83.8, 84.37, 84.1, 83.05, 83.28, 82.6, 83.52, 83.69, 84.19, 83.82, 84.79, 84.79, 85.04, 85.44, 84.39, 83.34, 83.17, 83.92, 83.58, 84.21, 84.6, 85.21, 85.64, 84.81, 83.47, 83.06, 83.06, 84.61, 84.43, 85.24, 85.04, 85.04, 87.62, 87.93, 87.93, 89.36, 89.06, 88.75, 89.06, 88.21, 88.06, 86.43, 87.2, 85.16, 86.16, 86.6, 86.34, 86.26, 86.91, 86.91, 87.23, 88.49, 89.82, 88.93, 90.23, 89.88, 89.78, 89.67, 89.4, 88.27, 88.21, 87.71, 87.13, 87.13, 86.54, 89.3, 90.3, 92.3, 93.31, 93.18, 93.18, 93.11, 92.82, 92.67, 93.02, 93.1, 93.09, 93.09, 93.09, 92.84, 92.64, 91.84, 91.84, 90.6, 88.35, 86.6, 86.61, 86.11, 86.61, 85.6, 85.84, 84.9, 85.05, 85.05, 85.04, 84.8, 85.16, 85.52, 85.63, 85.65, 86.15, 86.15, 86.16, 86.67, 87.15, 87.31, 87.23, 87.35, 87.97, 88.17, 88.78, 88.78, 91.78, 91.94, 91.48, 91.48, 90.93, 91.23, 90.87, 90.88, 91.62, 91.62, 92.83, 92.83, 93.95, 93.96, 95.84, 97.09, 97.09, 97.09, 100.01, 99.6, 99.6, 100.6, 102.1, 103.73, 103.2, 104.18, 106.94, 108.45, 110.45, 112.99, 112.99, 112.99, 115.48, 116.97, 115.05, 117.55, 122.04, 122.04, 125.06, 125.06, 126.06, 130.56, 130.37, 133.01, 131.25, 134.27, 134.88, 138.09, 144.08, 148.88, 143.87, 142.91, 144.93, 146.44, 153.27, 155.24, 160.26, 162.26, 165.76, 170.13, 166.77, 165.76, 162.48, 160.08, 156.8, 153.53, 158.05, 152.78, 149.59, 144.57, 147.38, 147.38, 143.88, 146.18, 147.08, 148.68, 152.15, 158.36, 157.02, 157.02, 158.08, 161.6, 162.62, 165.2, 168.72, 167.51, 170.83, 174.81, 178.33, 181.36, 178.09, 172.1, 172.1, 169.4, 167.68, 165.79, 166.33, 166.63, 167.4, 169.16, 166.18, 166.18, 168.53, 171.6, 171.61, 169.54, 166.74, 166.74, 169.8, 171.79, 174.87, 178.87, 182.35, 180.83, 184.92, 189.92, 185.92, 185.92, 189.61, 197.56, 204.97, 211.97, 214.51, 214.51, 210.41, 213.97, 217.2, 224.42, 221.59, 220.74, 216.27, 211.09, 206.6, 208.62, 217.13, 218.99, 226.01, 230.86, 237.39, 238.53, 231.67, 229.55, 226.55, 229.62, 223.64, 217.65, 213.83, 220.77, 224.53, 224.27, 230.99, 226.11, 232.77, 228.79, 222.06, 219.19, 218.07, 224.68, 220.4, 223.19, 229.69, 229.69, 224.61, 225.85, 220.45, 216.41, 214.8, 214.23, 215.08, 208.99, 202.6, 205.05, 205.02, 198.3, 191.57, 183.77, 179.8, 179.93, 181.89, 175.89, 172.21, 170.71, 170.56, 176.75, 175.26, 169.26, 170.09, 176.06, 179.43, 184.44, 180.24, 180.24, 178.43, 178.43, 180.65, 175.93, 177.42, 177.42, 181.19, 185.17, 188.35, 185.28, 178.39, 171.69, 178.52, 177.52, 175.25, 178.08, 175.15, 169.15, 168.4, 169.56, 174.53, 172.57, 170.51, 171.84, 172.91, 172.91, 172.22, 165.79, 165.06, 164.76, 160.72, 158.58, 158.67, 158.05, 150.19, 147.14, 148.24, 144.52, 142.02, 139.52, 139.92, 138.52, 137.5, 137.24, 133.34, 134.44, 134.84, 132.56, 132.42, 133.24, 134.41, 131.64, 131.81, 129.2, 126.19, 125.52, 126.66, 125.47, 127.27, 129.47, 129.07, 132.52, 131.69, 129.6, 129.62, 128.82, 128.37, 127.69, 127.69, 128.47, 128.89, 127.43, 126.6, 126.6, 126.6, 126.72, 128.3, 130.3, 127.78, 128.72, 128.72, 126.91, 125.83, 121.08, 121, 118.52, 115.09, 115.97, 114.21, 115.06, 113.54, 115.36, 117.12, 115.41, 115.41, 116.47, 116.55, 115.42, 115.42, 115.42, 115.27, 115.07, 114.68, 111.91, 112.39, 112.45, 112.45, 112.85, 115.18, 115.18, 114.31, 112.36, 111.29, 111.29, 112.44, 110.59, 112.43, 111.81, 112.86, 112.78, 111.87, 113.88, 114.12, 110.12, 108.23, 105.78, 105.78, 105.76, 105.64, 105.51, 105.79, 106.83, 104.45, 104.85, 105.39, 105.74, 107.17, 105.67, 105.42, 103.96, 100.24, 100.05, 98.83, 99.49, 99.49, 99.65, 99.16, 99.16, 99.56, 99.56, 99.56, 100.28, 102.63, 103.53, 103.56, 104.27, 104.27, 103.8, 105.54, 106, 106.39, 106.39, 105.73, 105.53, 105.53, 108.28, 107.68, 108.28, 108.73, 105.78, 105.78, 104.85, 104.79, 104.94, 105.46, 106.59, 106.59, 105.62, 104.83, 103.53, 103.92, 104.44, 104.43, 104.8, 104.71, 102.8, 102.8, 102.73, 101.42, 100.48, 101.14, 101.7, 102.16, 100.5, 99.2, 97.76, 101.7, 100.9, 99.71, 99.24, 98.73, 98, 98, 97.27, 97.4, 97.45, 98.95, 97.75, 98.09, 99.26, 99.44, 100.55, 102.06, 102.96, 102.75, 102.75, 102.9, 99.95, 99.78, 99.78, 100.62, 98.82, 100.59, 101.29, 100.42, 99.31, 100.05, 101.78, 102.48, 102.72, 103.68, 102.69, 101.73, 102.92, 102.45, 101.15, 101.15, 100.88, 99.88, 98.88, 98.1, 97.6, 94.74, 91.96, 91.72, 92.18, 89.84, 89.5, 90.63, 89.94, 86.22, 83.39, 85.8, 85.36, 85.36, 84.49, 82.5, 82.76, 79.89, 79.88, 78.36, 81.36, 82.52, 81.47, 82.9, 82.57, 82.79, 82.86, 83.18, 83.95, 86.52, 84.85, 81.52, 81.71, 80.31, 80.06, 81.46, 82.48, 82.99, 83.52, 83.52, 82.43, 82.43, 82.49, 82.49, 82.49, 81.49, 85.03, 86.5, 85.85, 85.96, 86.05, 86.05, 85.55, 84.3, 82.86, 84.39, 84.39, 84.62, 84.62, 84.14, 84.61, 85.84, 86.73, 87.05, 87.97, 87.97, 85.13, 83.44, 83.75, 83.81, 83.27, 83.52, 84.1, 86.65, 86.65, 86.65, 86.61, 87.19, 86.97, 88.06, 89.03, 88.03, 88.03, 87.02, 86.56, 87.2, 87.2, 86.68, 86.48, 85.95, 86.14, 88.29, 87.84, 88.59, 88.97, 88.39, 86.52, 85.6, 84.71, 83.54, 83.54, 82.73, 82.91, 83.25, 83.25, 83.77, 82.16, 82.92, 83.85, 84.94, 86.29, 85.81, 85.77, 85.77, 83.82, 82.79, 83.29, 83.09, 83.81, 83.25, 82.3, 82.49, 82.49, 82.49, 82.19, 81.9, 81.69, 81.69, 82.44, 81.94, 82.43, 83.44, 83.66, 82.97, 83.46, 83.46, 83.46, 82.91, 83.9, 83.37, 83.37, 83.87, 84.76, 84.76, 84.24, 84.24, 84.69, 84.71, 84.46, 85.28, 85.7, 85.2, 85.71, 86.19, 86.19, 85.67, 85.67, 85.98, 86.17, 86.17, 86.78, 85.99, 85.19, 85.49, 85.49, 85.49, 85.49, 85.97, 85.47, 85.18, 85.43, 85.45, 85.45, 85.73, 86.88, 87.37, 87.99, 87.99, 88.57, 88.89, 89.89, 88.89, 89.23, 89.73, 90.09, 90.09, 90.54, 89.98, 89.83, 89.85, 89.74, 89.74, 89.74, 90.7, 90.7, 91.05, 91.3, 90.51, 90.32, 89.75, 89.77, 92.09, 92.4, 92.4, 93.36, 93.85, 93.89, 93.13, 93.15, 92.95, 93.22, 94.71, 96.71, 97.31, 97, 97.19, 96.09, 95.09, 94.58, 94.31, 95.37, 95.77, 95.77, 95.8, 94.89, 96.28, 94.75, 94.98, 94.1, 93.41, 94.54, 94.02, 95.49, 93.78, 93.1, 94.09, 92.89, 92.78, 93.58, 92.44, 91.41, 91.91, 92.41, 92.41, 92.11, 93.58, 94.55, 95.07, 94.42, 94.89, 95.19, 94.47, 94.21, 94.72, 94.21, 93.96, 94.45, 93.97, 92.88, 92.39, 91.39, 91.39, 91.39, 91.87, 91.26, 91.22, 90.72, 93.69, 94.68, 94.33, 94.68, 94.68, 94.68, 97.11, 98.33, 98.33, 96.6, 95.14, 95.11, 94.58, 94.58, 92.99, 93.71, 92.9, 92.9, 92.84, 93.83, 93.22, 94.67, 94.67, 94.17, 94.53, 94.56, 95.55, 94.06, 94.58, 94.58, 94.16, 93.71, 94.32, 95.32, 95.32, 94.82, 95.25, 95.66, 94.85, 94.48, 94.87, 95.87, 95.97, 95.67, 95.89, 96.28, 98.36, 98.79, 98.4, 99.77, 99.57, 98.69, 98.89, 99.09, 99.09, 94.76],
+                    },
+                    {
+                        name: 'FCINDEX-XM',
+                        type: 'line',
+                        itemStyle: {
+                            normal: {
+                                lineStyle: {
+                                    shadowColor: 'rgba(0,0,0,0.4)'
+                                }
+                            }
+                        },
+                        data: [82.18, 82.5, 80.11, 80.54, 80.24, 80.04, 81.24, 80.62, 81.06, 80.78, 80.08, 80.08, 79.81, 79.22, 80.2, 79.54, 78.57, 78.57, 77.97, 77.84, 77.78, 77.17, 77.94, 78.49, 77.99, 76.8, 78.73, 80.63, 81.06, 81.14, 85.05, 85.05, 85.05, 86.16, 86.16, 85.47, 86.42, 86.94, 87.69, 86.73, 87.73, 86.65, 87.22, 86.93, 85.8, 86.09, 85.09, 86.16, 86.35, 87.06, 86.65, 87.63, 87.63, 87.85, 88.27, 87.26, 86.17, 85.99, 86.79, 86.39, 87.28, 87.72, 88.34, 88.69, 87.77, 86.47, 86.08, 86.08, 87.68, 87.43, 88.27, 88.11, 88.11, 90.76, 91.11, 91.11, 92.45, 92.15, 91.89, 92.24, 91.42, 91.37, 89.74, 90.51, 88.63, 89.63, 90.04, 89.8, 89.74, 90.39, 90.39, 90.69, 91.9, 93.25, 92.36, 93.57, 93.19, 93.07, 92.95, 92.64, 91.62, 91.58, 91.11, 90.54, 90.51, 89.93, 92.5, 93.5, 95.36, 96.31, 96.2, 96.2, 96.13, 95.81, 95.66, 96.01, 96.1, 95.73, 95.73, 95.73, 95.52, 95.42, 94.6, 94.6, 93.46, 91.43, 89.61, 89.62, 89.12, 89.55, 88.47, 88.71, 87.72, 87.89, 87.89, 87.85, 87.58, 87.93, 88.27, 88.46, 88.5, 88.82, 88.82, 88.85, 88.93, 89.84, 90.22, 90.15, 90.25, 90.33, 90.45, 91.32, 91.32, 94.32, 94.77, 94.37, 94.37, 94.04, 94.61, 94.09, 94.27, 95.16, 95.16, 96.58, 96.58, 97.73, 97.74, 99.65, 101.03, 101.03, 101.03, 103.83, 103.5, 103.5, 104.39, 105.89, 107.58, 107.11, 108.39, 111.1, 112.37, 114.37, 116.1, 116.1, 116.1, 119.03, 120.6, 119.16, 121.49, 125.87, 125.87, 128.88, 128.88, 129.48, 134.07, 133.68, 135.99, 134.27, 137.45, 138.2, 141.68, 147.67, 152.47, 147.41, 146.53, 148.53, 150.38, 157.07, 159.04, 164.13, 166.13, 169.73, 173.7, 170.47, 169.25, 165.77, 163.59, 160.28, 157.25, 161.93, 156.55, 153.44, 148.4, 151.69, 151.69, 148.19, 150.58, 151.52, 153.39, 156.87, 163.67, 162.56, 162.56, 163.74, 167.46, 168.59, 171.4, 174.92, 173.61, 177.06, 180.44, 183.85, 187.11, 183.65, 177.73, 177.73, 175.18, 173.55, 171.59, 172.21, 172.63, 173.33, 174.97, 171.76, 171.76, 174.17, 177.28, 177.28, 174.96, 172.26, 172.26, 175.37, 177.45, 180.57, 184.44, 187.73, 186.33, 190.13, 194.97, 190.97, 190.97, 194.73, 201.39, 208.22, 214.97, 217.54, 217.54, 213.76, 217.4, 221.1, 227.25, 224.1, 223.32, 219.09, 214.46, 210, 212.79, 219, 221.27, 228.51, 233.38, 239.86, 241.2, 234.96, 232.71, 230.09, 232.73, 227.26, 221.78, 218.03, 223.48, 226.75, 226.5, 231.9, 227.74, 234.36, 230.65, 224.03, 221.37, 220.45, 226.27, 221.95, 224.53, 231.25, 231.25, 226.25, 227.27, 222.79, 218.94, 217.54, 217.01, 217.76, 211.27, 204.96, 207.39, 207.39, 200.54, 193.83, 186.08, 182.12, 182.28, 184.1, 178.1, 174.35, 172.87, 172.74, 179.02, 177.68, 171.68, 172.51, 178.47, 181.84, 187.25, 183.86, 183.86, 182.06, 182.06, 183.55, 177.57, 178.34, 178.24, 182.2, 186.04, 189.16, 185.69, 179.62, 174.25, 179.81, 178.84, 176.58, 179.04, 175.75, 169.78, 169.06, 170.09, 175.05, 173.02, 171.09, 172.96, 173.6, 173.6, 172.75, 166.67, 165.44, 165.08, 161.06, 158.89, 158.95, 158.77, 150.95, 147.72, 148.84, 144.94, 142.34, 139.79, 140.32, 139.2, 138.08, 137.46, 133.55, 134.67, 135.22, 133.41, 132.89, 133.61, 134.81, 132.77, 132.91, 129.39, 126.39, 125.79, 127.04, 125.75, 127.55, 129.73, 129.35, 132.64, 131.91, 129.72, 129.76, 128.96, 128.42, 127.8, 127.85, 128.57, 129.03, 128.24, 127.68, 127.68, 127.68, 127.78, 129.45, 131.4, 129.34, 130.14, 130.14, 128.87, 127.81, 124.46, 124.18, 122.44, 119.16, 119.82, 117.82, 118.18, 116.88, 117.72, 118.43, 116.98, 116.98, 117.88, 118.32, 117.39, 117.39, 117.39, 116.74, 116.55, 116.16, 113.48, 113.8, 113.88, 114, 114.37, 116.55, 116.55, 115.39, 113.28, 112.47, 112.47, 113.16, 111.21, 112.71, 112.19, 113.53, 113.47, 112.78, 114.57, 114.73, 110.76, 109.06, 106.71, 106.78, 106.56, 105.88, 105.66, 106.04, 107, 105, 105.43, 105.8, 106.08, 107.58, 106.61, 106.11, 104.22, 100.78, 100.24, 99.03, 99.64, 99.64, 100.15, 99.84, 99.84, 100.29, 100.29, 100.29, 100.82, 103.15, 104.05, 104.14, 104.62, 104.79, 104.09, 105.81, 107.06, 107.86, 107.86, 107.14, 107.02, 107.02, 109.98, 109.61, 109.99, 110.28, 107.68, 107.68, 107.1, 106.19, 106.43, 106.88, 108.21, 108.21, 107.52, 106.99, 105.1, 105.33, 105.71, 105.79, 105.95, 105.74, 104.4, 104.4, 104.19, 102.97, 101.6, 102, 102.35, 102.68, 100.9, 99.65, 99.5, 102.15, 101.35, 100.59, 100.07, 99.69, 99.22, 99.19, 98.39, 98.47, 98.59, 100.23, 99.55, 99.77, 100.51, 100.82, 101.93, 103.2, 104.23, 104.02, 104.02, 104.02, 102.42, 102.18, 102.18, 102.43, 101.16, 101.44, 102.3, 101.82, 100.62, 101, 102.38, 103.12, 103.37, 104.14, 103.26, 102.9, 103.64, 103.35, 101.81, 101.81, 101.5, 100.87, 99.95, 99.01, 98.53, 95.3, 92.42, 92.24, 92.46, 90.3, 90.12, 91.1, 90.31, 87.17, 84.54, 86.94, 86.03, 86.03, 85.3, 83.6, 83.72, 81.91, 81.91, 80.39, 83.16, 85.07, 83.24, 83.88, 83.66, 83.38, 83.5, 83.82, 84.93, 87.4, 85.73, 81.73, 82.15, 81.42, 81.29, 82.23, 83.98, 84.47, 85.15, 85.15, 84.25, 84.25, 84.97, 84.97, 84.97, 84.29, 87.39, 88.42, 87.84, 88.5, 89.11, 89.35, 88.85, 87.74, 86.39, 87.61, 87.66, 87.51, 87.53, 87.18, 87.39, 88.23, 89.14, 88.99, 89.58, 89.58, 87.49, 86.15, 86.48, 86.79, 86.12, 86.28, 86.78, 89.41, 89.24, 89.24, 89.01, 89.69, 89.32, 90.23, 90.79, 90.78, 90.78, 89.47, 88.81, 89.17, 89.24, 88.98, 88.67, 87.95, 88.2, 89.67, 89.44, 89.92, 90.15, 89.28, 87.72, 87.31, 86.41, 85.67, 85.72, 84.6, 84.99, 85.14, 85.14, 85.45, 84.1, 84.48, 84.98, 86.08, 87.73, 87.5, 87.22, 87.22, 85.91, 84.76, 85.21, 84.82, 85.61, 84.76, 84.02, 84.11, 84.11, 84.11, 83.75, 83.43, 83.34, 83.34, 83.77, 83.28, 83.63, 84.32, 84.47, 84.06, 84.31, 84.31, 84.31, 83.48, 84.02, 83.89, 83.82, 84.32, 85.23, 85.23, 84.69, 84.69, 85.13, 85.21, 85.06, 85.89, 86.12, 85.83, 86.12, 86.51, 86.51, 86.24, 86.24, 86.43, 86.63, 86.63, 87.05, 86.29, 85.41, 86.07, 86.07, 86.07, 86.07, 86.36, 85.97, 85.82, 85.96, 86.01, 86.01, 86.26, 87.41, 87.7, 88.2, 88.2, 88.7, 89.12, 90.17, 89.17, 89.47, 89.97, 90.77, 90.77, 90.99, 90.6, 90.46, 90.61, 90.52, 90.52, 90.52, 91.58, 91.58, 91.93, 92.08, 91.49, 91.4, 91.12, 91.31, 93.79, 94.32, 94.32, 94.98, 95.31, 95.47, 95.07, 95.3, 95.54, 95.91, 97.02, 98.92, 99.91, 99.4, 99.6, 98.23, 97.54, 96.82, 96.35, 97.47, 97.95, 97.95, 97.98, 97.26, 98.39, 97.12, 97.22, 96.2, 95.52, 96.55, 95.92, 96.95, 95.55, 95.23, 95.93, 95.18, 94.64, 95.3, 94.36, 93.6, 93.89, 94.2, 94.2, 93.89, 95.29, 95.68, 96.08, 95.76, 96.23, 96.43, 95.35, 95.16, 95.62, 95.2, 95.04, 95.34, 95.03, 93.9, 93.58, 92.9, 93.07, 93.07, 93.33, 92.98, 92.81, 92.45, 94.69, 95.62, 95.4, 95.64, 95.64, 95.64, 98.04, 99.06, 99.06, 97.85, 96.37, 96.04, 95.54, 95.48, 94.7, 95.88, 95.31, 95.31, 95.21, 95.84, 95.43, 96.62, 96.62, 96.05, 96.44, 96.48, 97.11, 96.14, 96.95, 97.2, 96.62, 96.07, 96.72, 97.54, 97.26, 96.92, 97.19, 97.42, 96.88, 96.67, 96.63, 96, 96.05, 95.92, 96.27, 96.86, 98.83, 99.29, 98.96, 100.29, 100.35, 99.25, 99.27, 99.48, 99.6, 95.29]
+                    },
+                    {
+                        name: 'FCINDEX-XS',
+                        type: 'line',
+                        itemStyle: {
+                            normal: {
+                                lineStyle: {
+                                    shadowColor: 'rgba(0,0,0,0.4)'
+                                }
+                            }
+                        },
+                        data: [84.84, 85.13, 83.1, 83.43, 83.23, 83.03, 84.38, 83.67, 84.03, 83.79, 83.15, 83.15, 82.86, 82.36, 83.23, 82.59, 81.64, 81.64, 81.11, 81.01, 80.8, 80.25, 80.93, 81.44, 80.91, 79.75, 81.69, 83.65, 84.09, 84.14, 88.01, 88.01, 88.01, 89.04, 89.04, 88.45, 89.43, 89.84, 90.56, 89.59, 90.49, 89.59, 90.06, 89.83, 88.77, 89, 88.07, 89.17, 89.34, 90.11, 89.65, 90.53, 90.53, 90.72, 91.08, 90, 88.94, 88.76, 89.57, 89.06, 86.69, 90.14, 90.75, 91.03, 90.07, 88.67, 88.27, 88.27, 89.82, 89.55, 90.42, 90.2, 90.2, 92.79, 93.28, 93.28, 94.58, 94.4, 94.15, 94.48, 93.62, 93.51, 92.05, 92.72, 90.78, 91.78, 92.16, 91.9, 91.82, 92.45, 92.45, 92.7, 93.87, 95.27, 94.41, 95.58, 95.22, 95.1, 94.99, 94.62, 93.86, 93.8, 93.49, 92.94, 92.84, 92.21, 94.64, 95.64, 97.53, 98.43, 98.34, 98.34, 98.27, 97.93, 97.78, 98.13, 98.21, 97.86, 97.86, 97.86, 97.65, 97.48, 96.67, 96.67, 95.38, 93.32, 91.62, 91.63, 91.13, 91.38, 90.26, 90.39, 89.4, 89.56, 89.56, 89.49, 89.14, 89.44, 89.79, 89.98, 90.1, 90.48, 90.35, 90.62, 90.85, 91.65, 91.96, 91.86, 91.93, 92.04, 92.15, 93.04, 93.04, 95.85, 96.31, 95.94, 95.94, 95.7, 96.28, 95.83, 95.98, 96.88, 96.88, 98.28, 98.28, 99.56, 99.58, 101.45, 103.05, 103.05, 103.05, 105.43, 105.24, 105.24, 106.12, 107.62, 109.36, 108.9, 110.49, 113.16, 114.52, 116.71, 118.34, 118.34, 118.34, 121.72, 123.55, 122.15, 124.62, 128.8, 128.8, 131.53, 131.46, 132.42, 137.24, 135.64, 137.68, 135.9, 139.23, 140.03, 143.7, 149.82, 154.62, 149.53, 148.61, 150.84, 153.12, 159.79, 161.62, 166.45, 168.45, 172.35, 176.29, 172.91, 171.74, 168.5, 166.64, 162.84, 159.44, 164.1, 159.07, 155.94, 150.85, 154.61, 154.61, 151.16, 153.61, 154.77, 156.43, 160.06, 167.16, 165.7, 165.7, 166.66, 169.92, 171, 174.02, 177.42, 176.16, 179.29, 182.53, 185.94, 189.06, 185.26, 179.41, 179.41, 176.99, 175.39, 173.75, 174.5, 175.65, 176.72, 178.54, 175.45, 175.45, 177.95, 180.86, 181, 178.5, 175.77, 175.77, 178.8, 180.83, 183.49, 187.39, 191, 189.54, 193.37, 198.24, 194.24, 194.24, 197.92, 204.72, 211.39, 218.29, 220.92, 220.92, 217.19, 220.89, 225.04, 231.54, 228.37, 227.89, 223.07, 218.38, 213.68, 217.04, 223.45, 225.46, 232.69, 237.32, 243.75, 245.1, 238.73, 236.53, 233.61, 236.23, 230.57, 224.92, 221.37, 226.81, 230.09, 229.8, 235.36, 231.3, 238.28, 234.44, 227.75, 225.31, 224.36, 230.1, 225.84, 228.42, 235.22, 235.22, 230.22, 231.26, 226.69, 222.65, 221.18, 220.63, 221.31, 214.59, 208.22, 210.74, 210.74, 203.91, 197.37, 189.76, 185.77, 186.23, 188.01, 182.01, 177.94, 176.49, 176.36, 182.38, 181.04, 175.04, 175.8, 181.64, 184.5, 190.05, 186.78, 186.78, 185.05, 185.05, 186.64, 181.09, 182, 182, 185.62, 189.45, 192.13, 188.61, 182.46, 176.84, 182.45, 181.47, 178.92, 181.16, 177.8, 171.91, 171.16, 171.99, 176.81, 174.52, 172.21, 174.18, 174.56, 174.56, 173.49, 167.28, 166, 165.67, 161.43, 159.3, 159.35, 159.13, 151.43, 148, 149.41, 145.34, 142.69, 140.11, 140.63, 139.49, 138.36, 137.74, 133.91, 134.95, 135.44, 133.76, 133.19, 133.79, 135.1, 133.15, 133.36, 130.26, 127.19, 126.69, 127.71, 126.4, 128.39, 130.5, 130.13, 133.42, 132.71, 130.72, 130.76, 129.77, 129.08, 128.32, 128.51, 129.21, 129.64, 129.37, 128.91, 128.91, 128.91, 129.12, 131.21, 133.18, 131.12, 131.89, 132.03, 130.7, 129.63, 126.23, 126.01, 124.34, 121.1, 121.81, 119.82, 120.73, 119.95, 121.97, 122.72, 121.68, 121.68, 123.22, 123.58, 122.39, 122.94, 123.29, 122.41, 122.24, 121.86, 119.21, 119.39, 119.61, 120.03, 120.52, 122.8, 122.8, 121.12, 118.87, 118.04, 118.04, 118.69, 116.75, 117.71, 116.98, 118.16, 118.02, 117.35, 119.02, 119.06, 115.15, 113.47, 111.7, 111.98, 111.63, 111.02, 110.79, 111.15, 112.09, 110.02, 110.4, 110.73, 111.01, 112.61, 111.53, 111.16, 109.08, 105.5, 105.08, 103.26, 103.87, 103.87, 104.28, 103.94, 103.94, 104.4, 104.4, 104.4, 104.92, 107.26, 108.15, 108.3, 109.35, 109.62, 109.02, 110.62, 111.55, 112.1, 112.1, 111.16, 111.02, 111.02, 113.93, 113.52, 113.95, 114.28, 111.65, 111.65, 111.03, 110.32, 110.53, 110.86, 112.17, 112.17, 111.41, 110.78, 109.04, 109.29, 109.68, 109.49, 109.54, 109.51, 108.32, 108.32, 108.1, 106.73, 105.5, 106.05, 106.51, 107.09, 105.44, 104.14, 103.68, 106.64, 105.84, 104.97, 104.62, 104.16, 103.77, 103.76, 103, 103.1, 103.23, 104.84, 104.07, 104.35, 105.19, 105.44, 106.76, 107.59, 109.01, 108.64, 108.64, 108.65, 106.34, 105.97, 105.97, 106.02, 104.95, 105.45, 106.74, 106.23, 104.43, 104.96, 106.27, 107.05, 107.29, 108.07, 107.1, 106.71, 107.6, 107.25, 104.96, 104.96, 104.62, 103.82, 102.81, 101.98, 101.51, 98.09, 95.26, 95.08, 95.32, 93.2, 92.97, 94.02, 93.31, 90.4, 87.68, 90.09, 89.28, 89.28, 88.53, 86.69, 86.84, 84.77, 84.75, 83.19, 86.01, 88.26, 86.73, 87.42, 86.93, 86.75, 86.9, 87.18, 88.19, 90.43, 88.84, 85.47, 85.79, 84.93, 84.78, 85.81, 86.91, 87.52, 88.17, 88.17, 87.1, 87.07, 87.45, 87.45, 87.45, 86.38, 89.35, 90.48, 89.74, 90.64, 91.28, 91.68, 91.18, 90.04, 88.78, 90.11, 90.14, 90.04, 90.08, 89.85, 90.15, 91.62, 92.69, 92.33, 92.74, 92.74, 90.4, 88.73, 88.98, 89.32, 88.77, 89.01, 89.47, 91.69, 91.3, 91.28, 90.77, 92.24, 91.85, 92.76, 93.59, 94.12, 94.12, 92.65, 92.03, 92.42, 92.46, 92.04, 91.62, 90.83, 91.09, 92.59, 92.39, 92.89, 93.06, 92.15, 90.57, 90.22, 89.42, 88.58, 88.75, 87.66, 88.08, 88.14, 88.14, 88.48, 87.15, 87.52, 88.21, 89.6, 91.26, 91.04, 90.56, 90.56, 89.29, 88.15, 88.68, 88.27, 88.91, 87.75, 87.04, 87.16, 87.16, 87.16, 86.84, 86.54, 86.18, 86.28, 86.78, 86.24, 86.56, 87.29, 87.54, 87.16, 87.42, 87.42, 87.42, 86.53, 87.07, 86.94, 86.92, 87.46, 88.37, 88.37, 87.87, 87.87, 88.27, 88.47, 88.26, 89.22, 89.45, 89.13, 89.44, 89.77, 89.77, 89.43, 89.43, 89.67, 89.85, 89.85, 90.34, 89.53, 88.61, 89.33, 89.33, 89.33, 89.33, 89.62, 89.31, 89.11, 89.33, 89.5, 89.5, 89.75, 90.6, 90.9, 91.52, 91.52, 92.1, 92.6, 93.78, 92.64, 93, 93.52, 94.27, 94.27, 94.65, 94.24, 94.13, 94.43, 94.28, 94.28, 94.28, 95.32, 95.32, 95.74, 95.97, 95.26, 95.16, 94.62, 94.77, 97.25, 97.73, 97.73, 98.24, 98.65, 98.96, 98.54, 98.76, 98.86, 99.24, 100.47, 102.2, 103.36, 102.66, 102.86, 101.22, 100.47, 99.6, 99.08, 100.29, 100.78, 100.78, 100.91, 100.11, 101.34, 99.95, 100.03, 99.24, 98.53, 99.38, 98.75, 99.74, 98.48, 98.13, 98.97, 98.16, 97.66, 98.49, 97.46, 96.32, 96.64, 97, 97, 96.82, 98.36, 98.77, 99.31, 99.01, 99.48, 99.63, 98.33, 98.06, 98.55, 98.12, 97.94, 98.26, 97.79, 96.53, 96.17, 95.24, 95.27, 95.27, 95.77, 95.27, 95.03, 94.61, 96.7, 97.84, 97.56, 97.95, 97.95, 97.95, 99.92, 100.99, 100.99, 99.86, 98.71, 98.25, 97.67, 97.37, 96.58, 97.67, 97.1, 97.21, 97.1, 97.8, 97.28, 98.5, 98.5, 97.97, 98.3, 98.5, 99.14, 97.9, 98.69, 98.88, 98.33, 97.83, 98.5, 99.26, 99.08, 98.73, 98.89, 99.11, 98.58, 98.44, 98.5, 98.66, 98.75, 98.27, 98.55, 98.9, 100.48, 101.01, 100.76, 102.02, 102.05, 101.1, 101.23, 101.36, 101.52, 97.5]
+                    }]
+                };
+
+                var option2 = {
+                    title: {
+                        text: '2010至今CCINDEX指数变化(2010~2013)'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['CC229', 'CC527', 'CC328']
+                    },
+                    toolbox: {
+                        show: false
+                    },
+                    calculable: true,
+                    dataZoom: {
+                        show: true,
+                        realtime: true,
+                        //start : 1,
+                        //end : 10
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ["2010-1-4", "2010-1-5", "2010-1-6", "2010-1-7", "2010-1-8", "2010-1-11", "2010-1-12", "2010-1-13", "2010-1-14", "2010-1-15", "2010-1-18", "2010-1-19", "2010-1-20", "2010-1-21", "2010-1-22", "2010-1-25", "2010-1-26", "2010-1-27", "2010-1-28", "2010-1-29", "2010-2-1", "2010-2-2", "2010-2-3", "2010-2-4", "2010-2-5", "2010-2-8", "2010-2-9", "2010-2-10", "2010-2-11", "2010-2-12", "2010-2-20", "2010-2-21", "2010-2-22", "2010-2-23", "2010-2-24", "2010-2-25", "2010-2-26", "2010-3-1", "2010-3-2", "2010-3-3", "2010-3-4", "2010-3-5", "2010-3-8", "2010-3-9", "2010-3-10", "2010-3-11", "2010-3-12", "2010-3-15", "2010-3-16", "2010-3-17", "2010-3-18", "2010-3-19", "2010-3-22", "2010-3-23", "2010-3-24", "2010-3-25", "2010-3-26", "2010-3-29", "2010-3-30", "2010-3-31", "2010-4-1", "2010-4-2", "2010-4-6", "2010-4-7", "2010-4-8", "2010-4-9", "2010-4-12", "2010-4-13", "2010-4-14", "2010-4-15", "2010-4-16", "2010-4-19", "2010-4-20", "2010-4-21", "2010-4-22", "2010-4-23", "2010-4-26", "2010-4-27", "2010-4-28", "2010-4-29", "2010-4-30", "2010-5-4", "2010-5-5", "2010-5-6", "2010-5-7", "2010-5-10", "2010-5-11", "2010-5-12", "2010-5-13", "2010-5-14", "2010-5-17", "2010-5-18", "2010-5-19", "2010-5-20", "2010-5-21", "2010-5-24", "2010-5-25", "2010-5-26", "2010-5-27", "2010-5-28", "2010-5-31", "2010-6-1", "2010-6-2", "2010-6-3", "2010-6-4", "2010-6-7", "2010-6-8", "2010-6-9", "2010-6-10", "2010-6-11", "2010-6-12", "2010-6-13", "2010-6-17", "2010-6-18", "2010-6-21", "2010-6-22", "2010-6-23", "2010-6-24", "2010-6-25", "2010-6-28", "2010-6-29", "2010-6-30", "2010-7-1", "2010-7-2", "2010-7-5", "2010-7-6", "2010-7-7", "2010-7-8", "2010-7-9", "2010-7-12", "2010-7-13", "2010-7-14", "2010-7-15", "2010-7-16", "2010-7-19", "2010-7-20", "2010-7-21", "2010-7-22", "2010-7-23", "2010-7-26", "2010-7-27", "2010-7-28", "2010-7-29", "2010-7-30", "2010-8-2", "2010-8-3", "2010-8-4", "2010-8-5", "2010-8-6", "2010-8-9", "2010-8-10", "2010-8-11", "2010-8-12", "2010-8-13", "2010-8-16", "2010-8-17", "2010-8-18", "2010-8-19", "2010-8-20", "2010-8-23", "2010-8-24", "2010-8-25", "2010-8-26", "2010-8-27", "2010-8-30", "2010-8-31", "2010-9-1", "2010-9-2", "2010-9-3", "2010-9-6", "2010-9-7", "2010-9-8", "2010-9-9", "2010-9-10", "2010-9-13", "2010-9-14", "2010-9-15", "2010-9-16", "2010-9-17", "2010-9-19", "2010-9-20", "2010-9-21", "2010-9-25", "2010-9-26", "2010-9-27", "2010-9-28", "2010-9-29", "2010-9-30", "2010-10-8", "2010-10-9", "2010-10-11", "2010-10-12", "2010-10-13", "2010-10-14", "2010-10-15", "2010-10-18", "2010-10-19", "2010-10-20", "2010-10-21", "2010-10-22", "2010-10-25", "2010-10-26", "2010-10-27", "2010-10-28", "2010-10-29", "2010-11-1", "2010-11-2", "2010-11-3", "2010-11-4", "2010-11-5", "2010-11-8", "2010-11-9", "2010-11-10", "2010-11-11", "2010-11-12", "2010-11-15", "2010-11-16", "2010-11-17", "2010-11-18", "2010-11-19", "2010-11-22", "2010-11-23", "2010-11-24", "2010-11-25", "2010-11-26", "2010-11-29", "2010-11-30", "2010-12-1", "2010-12-2", "2010-12-3", "2010-12-6", "2010-12-7", "2010-12-8", "2010-12-9", "2010-12-10", "2010-12-13", "2010-12-14", "2010-12-15", "2010-12-16", "2010-12-17", "2010-12-20", "2010-12-21", "2010-12-22", "2010-12-23", "2010-12-24", "2010-12-27", "2010-12-28", "2010-12-29", "2010-12-30", "2010-12-31", "2011-1-4", "2011-1-5", "2011-1-6", "2011-1-7", "2011-1-10", "2011-1-11", "2011-1-12", "2011-1-13", "2011-1-14", "2011-1-17", "2011-1-18", "2011-1-19", "2011-1-20", "2011-1-21", "2011-1-24", "2011-1-25", "2011-1-26", "2011-1-27", "2011-1-28", "2011-1-30", "2011-1-31", "2011-2-1", "2011-2-9", "2011-2-10", "2011-2-11", "2011-2-12", "2011-2-14", "2011-2-15", "2011-2-16", "2011-2-17", "2011-2-18", "2011-2-21", "2011-2-22", "2011-2-23", "2011-2-24", "2011-2-25", "2011-2-28", "2011-3-1", "2011-3-2", "2011-3-3", "2011-3-4", "2011-3-7", "2011-3-8", "2011-3-9", "2011-3-10", "2011-3-11", "2011-3-14", "2011-3-15", "2011-3-16", "2011-3-17", "2011-3-18", "2011-3-21", "2011-3-22", "2011-3-23", "2011-3-24", "2011-3-25", "2011-3-28", "2011-3-29", "2011-3-30", "2011-3-31", "2011-4-1", "2011-4-2", "2011-4-6", "2011-4-7", "2011-4-8", "2011-4-11", "2011-4-12", "2011-4-13", "2011-4-14", "2011-4-15", "2011-4-18", "2011-4-19", "2011-4-20", "2011-4-21", "2011-4-22", "2011-4-25", "2011-4-26", "2011-4-27", "2011-4-28", "2011-4-29", "2011-5-3", "2011-5-4", "2011-5-5", "2011-5-6", "2011-5-9", "2011-5-10", "2011-5-11", "2011-5-12", "2011-5-13", "2011-5-16", "2011-5-17", "2011-5-18", "2011-5-19", "2011-5-20", "2011-5-23", "2011-5-24", "2011-5-25", "2011-5-26", "2011-5-27", "2011-5-30", "2011-5-31", "2011-6-1", "2011-6-2", "2011-6-3", "2011-6-7", "2011-6-8", "2011-6-9", "2011-6-10", "2011-6-13", "2011-6-14", "2011-6-15", "2011-6-16", "2011-6-17", "2011-6-20", "2011-6-21", "2011-6-22", "2011-6-23", "2011-6-24", "2011-6-27", "2011-6-28", "2011-6-29", "2011-6-30", "2011-7-1", "2011-7-4", "2011-7-5", "2011-7-6", "2011-7-7", "2011-7-8", "2011-7-11", "2011-7-12", "2011-7-13", "2011-7-14", "2011-7-15", "2011-7-18", "2011-7-19", "2011-7-20", "2011-7-21", "2011-7-22", "2011-7-25", "2011-7-26", "2011-7-27", "2011-7-28", "2011-7-29", "2011-8-1", "2011-8-2", "2011-8-3", "2011-8-4", "2011-8-5", "2011-8-8", "2011-8-9", "2011-8-10", "2011-8-11", "2011-8-12", "2011-8-15", "2011-8-16", "2011-8-17", "2011-8-18", "2011-8-19", "2011-8-22", "2011-8-23", "2011-8-24", "2011-8-25", "2011-8-26", "2011-8-29", "2011-8-30", "2011-8-31", "2011-9-1", "2011-9-2", "2011-9-5", "2011-9-6", "2011-9-7", "2011-9-8", "2011-9-9", "2011-9-13", "2011-9-14", "2011-9-15", "2011-9-16", "2011-9-19", "2011-9-20", "2011-9-21", "2011-9-22", "2011-9-23", "2011-9-26", "2011-9-27", "2011-9-28", "2011-9-29", "2011-9-30", "2011-10-8", "2011-10-9", "2011-10-10", "2011-10-11", "2011-10-12", "2011-10-13", "2011-10-14", "2011-10-17", "2011-10-18", "2011-10-19", "2011-10-20", "2011-10-21", "2011-10-24", "2011-10-25", "2011-10-26", "2011-10-27", "2011-10-28", "2011-10-31", "2011-11-1", "2011-11-2", "2011-11-3", "2011-11-4", "2011-11-7", "2011-11-8", "2011-11-9", "2011-11-10", "2011-11-11", "2011-11-14", "2011-11-15", "2011-11-16", "2011-11-17", "2011-11-18", "2011-11-21", "2011-11-22", "2011-11-23", "2011-11-24", "2011-11-25", "2011-11-28", "2011-11-29", "2011-11-30", "2011-12-1", "2011-12-2", "2011-12-5", "2011-12-6", "2011-12-7", "2011-12-8", "2011-12-9", "2011-12-12", "2011-12-13", "2011-12-14", "2011-12-15", "2011-12-16", "2011-12-19", "2011-12-20", "2011-12-21", "2011-12-22", "2011-12-23", "2011-12-26", "2011-12-27", "2011-12-28", "2011-12-29", "2011-12-30", "2011-12-31", "2012-1-4", "2012-1-5", "2012-1-6", "2012-1-9", "2012-1-10", "2012-1-11", "2012-1-12", "2012-1-13", "2012-1-16", "2012-1-17", "2012-1-18", "2012-1-19", "2012-1-20", "2012-1-21", "2012-1-29", "2012-1-30", "2012-1-31", "2012-2-1", "2012-2-2", "2012-2-3", "2012-2-6", "2012-2-7", "2012-2-8", "2012-2-9", "2012-2-10", "2012-2-13", "2012-2-14", "2012-2-15", "2012-2-16", "2012-2-17", "2012-2-20", "2012-2-21", "2012-2-22", "2012-2-23", "2012-2-24", "2012-2-27", "2012-2-28", "2012-2-29", "2012-3-1", "2012-3-2", "2012-3-5", "2012-3-6", "2012-3-7", "2012-3-8", "2012-3-9", "2012-3-12", "2012-3-13", "2012-3-14", "2012-3-15", "2012-3-16", "2012-3-19", "2012-3-20", "2012-3-21", "2012-3-22", "2012-3-23", "2012-3-26", "2012-3-27", "2012-3-28", "2012-3-29", "2012-3-30", "2012-3-31", "2012-4-1", "2012-4-5", "2012-4-6", "2012-4-9", "2012-4-10", "2012-4-11", "2012-4-12", "2012-4-13", "2012-4-16", "2012-4-17", "2012-4-18", "2012-4-19", "2012-4-20", "2012-4-23", "2012-4-24", "2012-4-25", "2012-4-26", "2012-4-27", "2012-4-28", "2012-5-2", "2012-5-3", "2012-5-4", "2012-5-7", "2012-5-8", "2012-5-9", "2012-5-10", "2012-5-11", "2012-5-14", "2012-5-15", "2012-5-16", "2012-5-17", "2012-5-18", "2012-5-21", "2012-5-22", "2012-5-23", "2012-5-24", "2012-5-25", "2012-5-28", "2012-5-29", "2012-5-30", "2012-5-31", "2012-6-1", "2012-6-4", "2012-6-5", "2012-6-6", "2012-6-7", "2012-6-8", "2012-6-11", "2012-6-12", "2012-6-13", "2012-6-14", "2012-6-15", "2012-6-18", "2012-6-19", "2012-6-20", "2012-6-21", "2012-6-25", "2012-6-26", "2012-6-27", "2012-6-28", "2012-6-29", "2012-7-2", "2012-7-3", "2012-7-4", "2012-7-5", "2012-7-6", "2012-7-9", "2012-7-10", "2012-7-11", "2012-7-12", "2012-7-13", "2012-7-16", "2012-7-17", "2012-7-18", "2012-7-19", "2012-7-20", "2012-7-23", "2012-7-24", "2012-7-25", "2012-7-26", "2012-7-27", "2012-7-30", "2012-7-31", "2012-8-1", "2012-8-2", "2012-8-3", "2012-8-6", "2012-8-7", "2012-8-8", "2012-8-9", "2012-8-10", "2012-8-13", "2012-8-14", "2012-8-15", "2012-8-16", "2012-8-17", "2012-8-20", "2012-8-21", "2012-8-22", "2012-8-23", "2012-8-24", "2012-8-27", "2012-8-28", "2012-8-29", "2012-8-30", "2012-8-31", "2012-9-3", "2012-9-4", "2012-9-5", "2012-9-6", "2012-9-7", "2012-9-10", "2012-9-11", "2012-9-12", "2012-9-13", "2012-9-14", "2012-9-17", "2012-9-18", "2012-9-19", "2012-9-20", "2012-9-21", "2012-9-24", "2012-9-25", "2012-9-26", "2012-9-27", "2012-9-28", "2012-9-29", "2012-10-8", "2012-10-9", "2012-10-10", "2012-10-11", "2012-10-12", "2012-10-15", "2012-10-16", "2012-10-17", "2012-10-18", "2012-10-19", "2012-10-22", "2012-10-23", "2012-10-24", "2012-10-25", "2012-10-26", "2012-10-29", "2012-10-30", "2012-10-31", "2012-11-1", "2012-11-2", "2012-11-5", "2012-11-6", "2012-11-7", "2012-11-8", "2012-11-9", "2012-11-12", "2012-11-13", "2012-11-14", "2012-11-15", "2012-11-16", "2012-11-19", "2012-11-20", "2012-11-21", "2012-11-22", "2012-11-23", "2012-11-26", "2012-11-27", "2012-11-28", "2012-11-29", "2012-11-30", "2012-12-3", "2012-12-4", "2012-12-5", "2012-12-6", "2012-12-7", "2012-12-10", "2012-12-11", "2012-12-12", "2012-12-13", "2012-12-14", "2012-12-17", "2012-12-18", "2012-12-19", "2012-12-20", "2012-12-21", "2012-12-24", "2012-12-25", "2012-12-26", "2012-12-27", "2012-12-28", "2012-12-31", "2013-1-4", "2013-1-5", "2013-1-6", "2013-1-7", "2013-1-8", "2013-1-9", "2013-1-10", "2013-1-11", "2013-1-14", "2013-1-15", "2013-1-16", "2013-1-17", "2013-1-18", "2013-1-21", "2013-1-22", "2013-1-23", "2013-1-24", "2013-1-25", "2013-1-28", "2013-1-29", "2013-1-30", "2013-1-31", "2013-2-1", "2013-2-4", "2013-2-5", "2013-2-6", "2013-2-7", "2013-2-8", "2013-2-16", "2013-2-17", "2013-2-18", "2013-2-19", "2013-2-20", "2013-2-21", "2013-2-22", "2013-2-25", "2013-2-26", "2013-2-27", "2013-2-28", "2013-3-1", "2013-3-4", "2013-3-5", "2013-3-6", "2013-3-7", "2013-3-8", "2013-3-11", "2013-3-12", "2013-3-13", "2013-3-14", "2013-3-15", "2013-3-18", "2013-3-19", "2013-3-20", "2013-3-21", "2013-3-22", "2013-3-25", "2013-3-26", "2013-3-27", "2013-3-28", "2013-3-29", "2013-4-1", "2013-4-2", "2013-4-3", "2013-4-7", "2013-4-8", "2013-4-9", "2013-4-10", "2013-4-11", "2013-4-12", "2013-4-15", "2013-4-16", "2013-4-17", "2013-4-18", "2013-4-19", "2013-4-22", "2013-4-23", "2013-4-24", "2013-4-25", "2013-4-26", "2013-4-27", "2013-4-28", "2013-5-2", "2013-5-3", "2013-5-6", "2013-5-7", "2013-5-8", "2013-5-9", "2013-5-10", "2013-5-13", "2013-5-14", "2013-5-15", "2013-5-16", "2013-5-17", "2013-5-20", "2013-5-21", "2013-5-22", "2013-5-23", "2013-5-24", "2013-5-27", "2013-5-28", "2013-5-29", "2013-5-30", "2013-5-31", "2013-6-3", "2013-6-4", "2013-6-5", "2013-6-6", "2013-6-7", "2013-6-8", "2013-6-9", "2013-6-13", "2013-6-14", "2013-6-17", "2013-6-18", "2013-6-19", "2013-6-20", "2013-6-21", "2013-6-24", "2013-6-25", "2013-6-26", "2013-6-27", "2013-6-28", "2013-7-1", "2013-7-2", "2013-7-3", "2013-7-4", "2013-7-5", "2013-7-8", "2013-7-9", "2013-7-10", "2013-7-11", "2013-7-12", "2013-7-15", "2013-7-16", "2013-7-17", "2013-7-18", "2013-7-19", "2013-7-22", "2013-7-23", "2013-7-24", "2013-7-25", "2013-7-26", "2013-7-29", "2013-7-30", "2013-7-31", "2013-8-1", "2013-8-2", "2013-8-5", "2013-8-6", "2013-8-7", "2013-8-8", "2013-8-9", "2013-8-12", "2013-8-13", "2013-8-14", "2013-8-15", "2013-8-16", "2013-8-19", "2013-8-20", "2013-8-21"]
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        axisLabel: {
+                            formatter: '{value} '
+                        },
+                        splitArea: {
+                            show: true
+                        }
+                    }],
+                    series: [{
+                        name: 'CC229',
+                        type: 'line',
+                        data: [15232, 15269, 15303, 15306, 15299, 15301, 15307, 15308, 15308, 15284, 15278, 15282, 15285, 15291, 15288, 15284, 15280, 15276, 15267, 15253, 15257, 15251, 15238, 15236, 15234, 15235, 15253, 15258, 15261, 15266, 15270, 15276, 15288, 15315, 15321, 15342, 15349, 15415, 15490, 15512, 15535, 15564, 15589, 15621, 15638, 15664, 15703, 15788, 15857, 15941, 16029, 16086, 16130, 16190, 16298, 16364, 16384, 16437, 16457, 16467, 16482, 16490, 16495, 16574, 16598, 16618, 16635, 16658, 16669, 16678, 16682, 16685, 16701, 16707, 16725, 16762, 16769, 16787, 16801, 16828, 16846, 16865, 16960, 16996, 17034, 17034, 17084, 17130, 17211, 17233, 17244, 17340, 17368, 17414, 17545, 17630, 17730, 17762, 17813, 17847, 17875, 17911, 18007, 18068, 18096, 18114, 18148, 18178, 18209, 18209, 18250, 18307, 18326, 18398, 18419, 18473, 18541, 18616, 18667, 18708, 18743, 18783, 18804, 18835, 18840, 18849, 18863, 18867, 18868, 18868, 18866, 18840, 18821, 18794, 18757, 18734, 18731, 18727, 18716, 18709, 18707, 18706, 18697, 18693, 18693, 18693, 18683, 18675, 18661, 18649, 18617, 18595, 18605, 18613, 18617, 18618, 18616, 18617, 18608, 18564, 18544, 18538, 18526, 18516, 18511, 18490, 18487, 18496, 18500, 18518, 18552, 18583, 18591, 18608, 18675, 18853, 18993, 19224, 19479, 19713, 19933, 20328, 20710, 21221, 21747, 22398, 23177, 23479, 23505, 23667, 23903, 24188, 24428, 24624, 24894, 24946, 25308, 25453, 25718, 26006, 26245, 26607, 26877, 26987, 27404, 27654, 28016, 28341, 28569, 28744, 29479, 30521, 31545, 32046, 32039, 31657, 30667, 30206, 29622, 29343, 29173, 28600, 28128, 27713, 27432, 27053, 27022, 26984, 27101, 27158, 27295, 27447, 27564, 27575, 27652, 27729, 27829, 28028, 28045, 28167, 28268, 28343, 28419, 28481, 28465, 28467, 28468, 28469, 28471, 28476, 28489, 28544, 28548, 28571, 28572, 28588, 28643, 28654, 28675, 28682, 28689, 28704, 28801, 28816, 29043, 29153, 29318, 29393, 29554, 29562, 29590, 29609, 29663, 29760, 30205, 30536, 30635, 30714, 30806, 30900, 31185, 31286, 31319, 31314, 31312, 31282, 31313, 31507, 31586, 31972, 32039, 32128, 32357, 32318, 32325, 32252, 32256, 32131, 31937, 31823, 31790, 31790, 31806, 31798, 31791, 31788, 31785, 31729, 31558, 31389, 31276, 31179, 31029, 30983, 30967, 30968, 30920, 30851, 30769, 30753, 30734, 30631, 30546, 30316, 30075, 29925, 29667, 29370, 28878, 28544, 28201, 28149, 28054, 27796, 27318, 26945, 26616, 26888, 26901, 26754, 26684, 26629, 26590, 26588, 26588, 26569, 26546, 26512, 26500, 26507, 26507, 26534, 26609, 26597, 26600, 26603, 26586, 26583, 26582, 26577, 26569, 26544, 26541, 26522, 26519, 26517, 26452, 26436, 26374, 26373, 26362, 26161, 26077, 25963, 25865, 25751, 25637, 25559, 25388, 25158, 24865, 24626, 24235, 24033, 23654, 23551, 23392, 23272, 23001, 22837, 22682, 22511, 22270, 22044, 21902, 21793, 21544, 21460, 21277, 21121, 20965, 20821, 20729, 20614, 20566, 20538, 20542, 20565, 20575, 20583, 20597, 20701, 20718, 20781, 20810, 20872, 20878, 20923, 20956, 21035, 21061, 21120, 21163, 21188, 21233, 21274, 21310, 21352, 21387, 21439, 21452, 21456, 21465, 21453, 21438, 21435, 21425, 21410, 21415, 21405, 21396, 21380, 21331, 21306, 21280, 21264, 21199, 21070, 21027, 20960, 20931, 20911, 20873, 20837, 20800, 20770, 20722, 20673, 20671, 20667, 20662, 20653, 20650, 20650, 20640, 20638, 20635, 20606, 20562, 20519, 20458, 20448, 20422, 20396, 20327, 20330, 20296, 20266, 20262, 20259, 20261, 20273, 20292, 20297, 20300, 20307, 20314, 20320, 20327, 20329, 20331, 20368, 20381, 20384, 20407, 20408, 20419, 20422, 20422, 20423, 20425, 20429, 20436, 20443, 20445, 20452, 20463, 20468, 20470, 20478, 20481, 20503, 20505, 20508, 20513, 20516, 20517, 20539, 20561, 20570, 20605, 20634, 20663, 20672, 20685, 20696, 20718, 20757, 20770, 20782, 20815, 20818, 20826, 20866, 20881, 20882, 20879, 20881, 20878, 20875, 20867, 20870, 20886, 20886, 20881, 20883, 20881, 20889, 20896, 20902, 20893, 20895, 20891, 20891, 20886, 20875, 20870, 20859, 20843, 20832, 20825, 20822, 20820, 20817, 20810, 20802, 20795, 20793, 20783, 20781, 20751, 20713, 20665, 20647, 20643, 20655, 20669, 20675, 20677, 20669, 20659, 20652, 20595, 20570, 20552, 20533, 20513, 20500, 20475, 20446, 20327, 20321, 20298, 20270, 20235, 20202, 20177, 20112, 20090, 20037, 20003, 19970, 19962, 19937, 19771, 19696, 19597, 19575, 19574, 19541, 19502, 19468, 19444, 19435, 19429, 19428, 19426, 19391, 19351, 19341, 19326, 19312, 19307, 19319, 19321, 19321, 19320, 19322, 19325, 19339, 19352, 19360, 19364, 19367, 19372, 19379, 19380, 19384, 19385, 19392, 19400, 19402, 19406, 19412, 19416, 19416, 19419, 19422, 19423, 19425, 19428, 19430, 19431, 19433, 19433, 19434, 19436, 19436, 19437, 19442, 19442, 19450, 19452, 19462, 19473, 19475, 19494, 19506, 19537, 19561, 19565, 19576, 19577, 19577, 19578, 19578, 19579, 19580, 19582, 19582, 19585, 19585, 19588, 19591, 19591, 19591, 19594, 19598, 19598, 19599, 19599, 19600, 19602, 19604, 19607, 19609, 19612, 19613, 19614, 19618, 19618, 19620, 19620, 19622, 19625, 19625, 19633, 19637, 19640, 19642, 19652, 19657, 19659, 19662, 19668, 19677, 19685, 19691, 19695, 19706, 19716, 19725, 19743, 19754, 19769, 19778, 19781, 19794, 19803, 19817, 19826, 19832, 19836, 19836, 19843, 19863, 19865, 19885, 19889, 19901, 19916, 19933, 19938, 19945, 19962, 19971, 19977, 19978, 19981, 19989, 19989, 20005, 20005, 20000, 20007, 20007, 20012, 20011, 20015, 20031, 20037, 20039, 20039, 20041, 20047, 20042, 20042, 20039, 20038, 20040, 20041, 20044, 20038, 20037, 20035, 20033, 20030, 20030, 20033, 20035, 20038, 20040, 20042, 20047, 20051, 20053, 20055, 20056, 20058, 20059, 20061, 20061, 20062, 20062, 20063, 20065, 20068, 20070, 20072, 20075, 20077, 20077, 20080, 20080, 20079, 20073, 20075, 20077, 20077, 20077, 20077, 20079, 20079, 20081, 20082, 20084, 20083, 20085, 20085, 20083, 20082, 20081, 20077, 20078, 20077, 20076, 20074, 20073, 20073, 20072, 20072, 20070, 20068, 20068, 20066, 20065, 20067, 20069, 20070, 20069, 20071, 20072, 20072, 20075, 20076, 20075, 20075, 20075, 20075, 20074, 20073, 20073, 20073, 20073, 20072, 20072, 20070, 20070, 20069, 20067, 20063, 20065, 20066, 20067, 20068, 20069, 20069, 20068, 20063, 20062, 20061, 20060, 20058, 20057, 20056, 20057, 20055, 20053, 20053, 20051, 20051, 20050, 20047, 20047, 20045, 20043, 20042, 20042, 20040, 20038, 20036, 20034, 20031, 20031, 20031, 20028, 20027, 20027, 20023, 20018, 20018, 20016, 20013, 20015, 20016, 20016, 20017, 20017, 20016]
+                    },
+                    {
+                        name: 'CC527',
+                        type: 'line',
+                        data: [13828, 13861, 13890, 13891, 13891, 13889, 13898, 14903, 13907, 13905, 13897, 13897, 13892, 13889, 13879, 13878, 13872, 13869, 13853, 13853, 13834, 13833, 13831, 13827, 13806, 13818, 13812, 13824, 13829, 13831, 13832, 13855, 13879, 13888, 13911, 13929, 13942, 13963, 14006, 14087, 14107, 14128, 14150, 14191, 14213, 14275, 14337, 14386, 14464, 14536, 14610, 14638, 14692, 14729, 14793, 14840, 14848, 14904, 14925, 14946, 14966, 14970, 14982, 15037, 15069, 15082, 15088, 15100, 15118, 15124, 15124, 15125, 15126, 15126, 15153, 15161, 15170, 15177, 15185, 15203, 15211, 15231, 15238, 15272, 15283, 15283, 15314, 15354, 15388, 15432, 15442, 15504, 15529, 15551, 15615, 15657, 15735, 15763, 15802, 15832, 15855, 15885, 16010, 16038, 16062, 16105, 16154, 16174, 16195, 16227, 16227, 16297, 16329, 16353, 16397, 16450, 16511, 16632, 16677, 16713, 16723, 16769, 16805, 16823, 16844, 16870, 16904, 16908, 16915, 16916, 16921, 16915, 16899, 16855, 16837, 16830, 16827, 16813, 16808, 16804, 16802, 16784, 16767, 16758, 16757, 16760, 16760, 16751, 16712, 16709, 16700, 16658, 16663, 16665, 16666, 16669, 16669, 16669, 16668, 16628, 16584, 16578, 16560, 16557, 16550, 16544, 16540, 16548, 16552, 16578, 16597, 16638, 16641, 16681, 16734, 16868, 17066, 17264, 17416, 17624, 17834, 18138, 18377, 18890, 19582, 20029, 20524, 20828, 20862, 21075, 21393, 21699, 21855, 22019, 22246, 22335, 22602, 22877, 23272, 23633, 23948, 24219, 24453, 24566, 24938, 25249, 25830, 25989, 26112, 26185, 26697, 27626, 28554, 28733, 28728, 28484, 27543, 27331, 26928, 26799, 26572, 26183, 25635, 25118, 24941, 24600, 24482, 24401, 24494, 24552, 24717, 24872, 24973, 25018, 25027, 25040, 25088, 25207, 25226, 25238, 25306, 25392, 25457, 25506, 25522, 25523, 25533, 25535, 25536, 25539, 25548, 25580, 25585, 25649, 25648, 25649, 25701, 25704, 25734, 25752, 25760, 25761, 25808, 25833, 25961, 25997, 26171, 26229, 26275, 26302, 26314, 26321, 26365, 26400, 26702, 27006, 27206, 27209, 27243, 27279, 27528, 27558, 27566, 27569, 27577, 27561, 27570, 27739, 27764, 27993, 28035, 28057, 28196, 28209, 28217, 28165, 28147, 28007, 27758, 27595, 27528, 27542, 27570, 27581, 27580, 27578, 27571, 27475, 27306, 27109, 27025, 26909, 26803, 26795, 26770, 26768, 26742, 26721, 26677, 26642, 26628, 26548, 26473, 26231, 26075, 25922, 25730, 25595, 24895, 24708, 24501, 24488, 24398, 24153, 23587, 23245, 22895, 22922, 22904, 22775, 22728, 22717, 22686, 22680, 22680, 22634, 22620, 22598, 22590, 22563, 22549, 22578, 22634, 22634, 22628, 22629, 22609, 22598, 22593, 22582, 22552, 22529, 22516, 22508, 22469, 22442, 22347, 22335, 22242, 22232, 22191, 22007, 21810, 21677, 21564, 21220, 21110, 20972, 20853, 20675, 20397, 20203, 19558, 19284, 18965, 18920, 18750, 18575, 18399, 18118, 17981, 17823, 17661, 17417, 17356, 17232, 17204, 17070, 16979, 16876, 16672, 16583, 16524, 16463, 16391, 16305, 16252, 16235, 16205, 16226, 16262, 16332, 16372, 16463, 16477, 16511, 16518, 16547, 16553, 16700, 16732, 16766, 16815, 16845, 16889, 16940, 16982, 16990, 17088, 17186, 17211, 17217, 17256, 17244, 17243, 17243, 17238, 17235, 17236, 17233, 17233, 17233, 17223, 17206, 17196, 17148, 17109, 17033, 17009, 16955, 16939, 16899, 16884, 16872, 16872, 16841, 16831, 16791, 16788, 16772, 16760, 16760, 16755, 16751, 16712, 16709, 16709, 16701, 16697, 16653, 16626, 16611, 16601, 16575, 16494, 16492, 16483, 16465, 16456, 16455, 16458, 16466, 16472, 16478, 16478, 16479, 16481, 16485, 16487, 16488, 16490, 16509, 16532, 16538, 16545, 16547, 16553, 16556, 16559, 16562, 16566, 16586, 16598, 16607, 16614, 16626, 16635, 16646, 16660, 16677, 16688, 16696, 16696, 16700, 16700, 16712, 16716, 16731, 16740, 16753, 16771, 16795, 16815, 16828, 16848, 16860, 16889, 16894, 16902, 16910, 16938, 16943, 16957, 16968, 16968, 16966, 16964, 16957, 16956, 16955, 16952, 16953, 16957, 16956, 16948, 16941, 16939, 16945, 16949, 16949, 16935, 16939, 16940, 16939, 16933, 16925, 16923, 16920, 16912, 16902, 16901, 16899, 16897, 16882, 16868, 16866, 16860, 16853, 16852, 16841, 16839, 16838, 16822, 16805, 16793, 16793, 16795, 16796, 16803, 16811, 16811, 16811, 16809, 16809, 16801, 16795, 16792, 16743, 16736, 16716, 16682, 16667, 16655, 16626, 16552, 16551, 16536, 16529, 16520, 16503, 16405, 16379, 16359, 16315, 16289, 16267, 16210, 16200, 16188, 16162, 16160, 16097, 16073, 16061, 16055, 16053, 16046, 16024, 16017, 15950, 15904, 15855, 15831, 15829, 15827, 15828, 15829, 15844, 15846, 15857, 15873, 15892, 15909, 15913, 15918, 15926, 15929, 15941, 15948, 15961, 15977, 15988, 15997, 16007, 16011, 16013, 16016, 16023, 16026, 16035, 16037, 16039, 16045, 16051, 16057, 16057, 16066, 16069, 16074, 16074, 16087, 16105, 16118, 16138, 16151, 16166, 16190, 16216, 16246, 16291, 16313, 16320, 16322, 16323, 16325, 16329, 16329, 16330, 16335, 16340, 16340, 16343, 16349, 16355, 16358, 16360, 16367, 16372, 16373, 16379, 16379, 16379, 16384, 16387, 16392, 16392, 16399, 16402, 16405, 16411, 16411, 16417, 16422, 16425, 16432, 16434, 16442, 16448, 16452, 16456, 16467, 16475, 16480, 16480, 16489, 16495, 16503, 16508, 16512, 16528, 16543, 16548, 16562, 16578, 16596, 16609, 16619, 16641, 16647, 16662, 16676, 16687, 16690, 16696, 16703, 16714, 16714, 16735, 16741, 16759, 16777, 16791, 16800, 16810, 16821, 16828, 16831, 16833, 16839, 16848, 16854, 16862, 16866, 16871, 16880, 16886, 16891, 16891, 16891, 16899, 16901, 16905, 16912, 16920, 16923, 16916, 16913, 16913, 16910, 16909, 16911, 16922, 16922, 16921, 16920, 16917, 16911, 16913, 16915, 16917, 16922, 16924, 16926, 16929, 16929, 16933, 16938, 16944, 16948, 16956, 16958, 16965, 16968, 16970, 16972, 16973, 16977, 16977, 16978, 16981, 16983, 16983, 16983, 16984, 16983, 16985, 16986, 16987, 16993, 16995, 16995, 17001, 16999, 17002, 17005, 17007, 17009, 17009, 17009, 17012, 17011, 17011, 17008, 17010, 17011, 17008, 17007, 17005, 17002, 16999, 16999, 16998, 16995, 16992, 16990, 16989, 16989, 16989, 16989, 16988, 16986, 16986, 16983, 16986, 16985, 16983, 16981, 16981, 16979, 16976, 16975, 16972, 16970, 16968, 16967, 16965, 16961, 16961, 16958, 16957, 16956, 16956, 16955, 16953, 16951, 16950, 16949, 16948, 16945, 16942, 16941, 16939, 16939, 16938, 16931, 16930, 16930, 16928, 16926, 16926, 16925, 16923, 16923, 16920, 16917, 16915, 16907, 16902, 16899, 16898, 16892, 16887, 16886, 16885, 16885, 16882, 16882, 16880, 16878, 16871, 16869, 16869, 16866, 16867, 16867, 16865, 16865, 16865, 16862]
+                    },
+                    {
+                        name: 'CC328',
+                        type: 'line',
+                        data: [14879, 14925, 14941, 14947, 14942, 14943, 14948, 14957, 14958, 14932, 14927, 14929, 14931, 14937, 14937, 14933, 14931, 14926, 14909, 14899, 14893, 14887, 14870, 14868, 14865, 14862, 14870, 14883, 14886, 14892, 14897, 14912, 14928, 14943, 14959, 14979, 14990, 15063, 15141, 15165, 15181, 15200, 15236, 15279, 15289, 15321, 15361, 15435, 15502, 15585, 15673, 15704, 15767, 15823, 15925, 16007, 16026, 16064, 16077, 16083, 16095, 16101, 16118, 16179, 16214, 16238, 16251, 16275, 16281, 16286, 16298, 16300, 16309, 16310, 16321, 16354, 16364, 16377, 16392, 16426, 16456, 16463, 16499, 16529, 16546, 16549, 16603, 16701, 16818, 16830, 16843, 16940, 16959, 17001, 17138, 17191, 17289, 17323, 17374, 17439, 17471, 17498, 17591, 17624, 17655, 17676, 17712, 17742, 17749, 17802, 17807, 17862, 17887, 17926, 17973, 18041, 18089, 18155, 18187, 18221, 18270, 18309, 18335, 18369, 18371, 18383, 18393, 18414, 18419, 18418, 18416, 18403, 18389, 18347, 18313, 18297, 18290, 18278, 18267, 18259, 18258, 18247, 18238, 18230, 18229, 18227, 18218, 18207, 18178, 18166, 18142, 18126, 18128, 18138, 18139, 18141, 18139, 18138, 18129, 18081, 18061, 18054, 18040, 18025, 18018, 18005, 18002, 18012, 18017, 18038, 18077, 18110, 18135, 18160, 18231, 18419, 18598, 18793, 19005, 19228, 19445, 19816, 20236, 20644, 21255, 21836, 22385, 22684, 22710, 22900, 23195, 23485, 23730, 23923, 24177, 24256, 24526, 24689, 24941, 25319, 25589, 25946, 26205, 26324, 26760, 27066, 27405, 27701, 27911, 28158, 28891, 29886, 30861, 31302, 31281, 30986, 29916, 29407, 28852, 28646, 28355, 27881, 27288, 26902, 26681, 26289, 26248, 26164, 26249, 26351, 26500, 26639, 26756, 26769, 26803, 26873, 26942, 27112, 27142, 27199, 27269, 27324, 27384, 27442, 27440, 27440, 27493, 27496, 27503, 27508, 27516, 27609, 27625, 27650, 27648, 27666, 27689, 27702, 27719, 27725, 27747, 27753, 27812, 27901, 28127, 28205, 28433, 28501, 28648, 28662, 28682, 28715, 28786, 28839, 29308, 29579, 29715, 29762, 29830, 29902, 30251, 30326, 30371, 30362, 30365, 30298, 30313, 30467, 30518, 30806, 30913, 31005, 31241, 31221, 31228, 31108, 31098, 30995, 30818, 30641, 30557, 30556, 30576, 30570, 30547, 30542, 30528, 30456, 30335, 30128, 30008, 29852, 29627, 29608, 29592, 29602, 29513, 29452, 29353, 29311, 29300, 29180, 29050, 28886, 28721, 28550, 28300, 27976, 27309, 26927, 26638, 26597, 26460, 26076, 25655, 25245, 24831, 24893, 24895, 24749, 24670, 24606, 24561, 24552, 24541, 24510, 24502, 24479, 24479, 24473, 24478, 24495, 24558, 24552, 24559, 24575, 24562, 24556, 24551, 24551, 24537, 24513, 24508, 24498, 24492, 24481, 24428, 24421, 24318, 24312, 24298, 24056, 23927, 23754, 23633, 23426, 23296, 23133, 23009, 22856, 22575, 22387, 21971, 21727, 21486, 21396, 21271, 21096, 20875, 20664, 20483, 20281, 20123, 19945, 19886, 19800, 19716, 19692, 19635, 19455, 19332, 19238, 19189, 19124, 19059, 19057, 19058, 19060, 19071, 19081, 19093, 19132, 19159, 19227, 19247, 19307, 19316, 19362, 19384, 19479, 19502, 19533, 19620, 19644, 19664, 19709, 19738, 19798, 19829, 19872, 19949, 19995, 20010, 20002, 19993, 19980, 19972, 19952, 19955, 19945, 19936, 19929, 19866, 19850, 19816, 19759, 19698, 19641, 19623, 19561, 19539, 19497, 19482, 19432, 19409, 19381, 19327, 19301, 19293, 19286, 19279, 19271, 19268, 19258, 19232, 19225, 19212, 19196, 19176, 19142, 19122, 19118, 19103, 19087, 19054, 19052, 19039, 19020, 19006, 19001, 19003, 19021, 19046, 19057, 19052, 19058, 19059, 19065, 19067, 19072, 19077, 19101, 19127, 19136, 19156, 19159, 19164, 19173, 19177, 19180, 19183, 19189, 19190, 19196, 19204, 19231, 19237, 19246, 19251, 19258, 19263, 19278, 19283, 19288, 19289, 19298, 19313, 19332, 19338, 19353, 19389, 19411, 19443, 19466, 19472, 19475, 19506, 19522, 19537, 19553, 19570, 19572, 19579, 19618, 19623, 19621, 19615, 19608, 19606, 19601, 19599, 19597, 19600, 19593, 19579, 19576, 19570, 19575, 19577, 19572, 19564, 19565, 19557, 19547, 19538, 19522, 19517, 19508, 19495, 19479, 19462, 19456, 19451, 19446, 19435, 19423, 19417, 19407, 19400, 19391, 19378, 19370, 19349, 19338, 19331, 19337, 19343, 19345, 19346, 19351, 19332, 19330, 19328, 19320, 19318, 19317, 19313, 19294, 19269, 19222, 19125, 19055, 19006, 18970, 18928, 18905, 18888, 18853, 18828, 18798, 18759, 18731, 18712, 18680, 18598, 18545, 18492, 18473, 18467, 18421, 18405, 18358, 18346, 18333, 18325, 18325, 18325, 18279, 18249, 18207, 18188, 18164, 18158, 18156, 18156, 18159, 18159, 18168, 18171, 18189, 18208, 18222, 18232, 18240, 18250, 18255, 18262, 18273, 18282, 18290, 18300, 18308, 18316, 18323, 18329, 18332, 18337, 18343, 18346, 18352, 18359, 18362, 18370, 18376, 18379, 18381, 18387, 18391, 18393, 18402, 18413, 18430, 18440, 18456, 18480, 18487, 18520, 18551, 18587, 18616, 18631, 18631, 18635, 18636, 18636, 18637, 18637, 18637, 18639, 18642, 18650, 18651, 18658, 18663, 18665, 18666, 18671, 18673, 18675, 18677, 18679, 18680, 18683, 18687, 18691, 18692, 18695, 18696, 18696, 18700, 18701, 18703, 18704, 18705, 18708, 18709, 18718, 18721, 18726, 18734, 18742, 18749, 18754, 18760, 18768, 18775, 18784, 18788, 18794, 18807, 18821, 18831, 18848, 18862, 18875, 18891, 18902, 18918, 18930, 18946, 18953, 18967, 18991, 18995, 19009, 19024, 19029, 19053, 19060, 19082, 19099, 19118, 19129, 19141, 19160, 19172, 19183, 19193, 19201, 19207, 19213, 19219, 19230, 19235, 19247, 19250, 19258, 19263, 19268, 19273, 19283, 19287, 19286, 19289, 19291, 19289, 19281, 19272, 19267, 19268, 19271, 19280, 19277, 19276, 19275, 19273, 19271, 19273, 19275, 19280, 19285, 19288, 19293, 19297, 19306, 19309, 19319, 19325, 19326, 19336, 19340, 19341, 19342, 19344, 19346, 19349, 19351, 19356, 19359, 19362, 19363, 19364, 19368, 19370, 19368, 19367, 19371, 19373, 19375, 19377, 19380, 19383, 19382, 19383, 19385, 19386, 19386, 19387, 19385, 19382, 19380, 19378, 19371, 19373, 19370, 19369, 19366, 19365, 19363, 19362, 19360, 19358, 19356, 19355, 19352, 19349, 19351, 19351, 19352, 19351, 19350, 19350, 19348, 19353, 19353, 19352, 19350, 19348, 19345, 19340, 19338, 19336, 19335, 19335, 19332, 19330, 19326, 19323, 19321, 19318, 19318, 19319, 19319, 19320, 19322, 19321, 19318, 19315, 19312, 19305, 19300, 19292, 19290, 19285, 19279, 19280, 19280, 19277, 19275, 19273, 19266, 19265, 19265, 19263, 19260, 19256, 19246, 19244, 19241, 19239, 19232, 19229, 19226, 19222, 19217, 19220, 19217, 19217, 19211, 19206, 19201, 19200, 19192, 19191, 19190, 19189, 19190, 19185, 19179]
+                    }]
+                };
+
+                var option3 = {
+                    'title': {
+                        text: '中国2006~2012年贸易额和出口被通报数'
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    toolbox: {
+                        show: true,
+                        feature: {
+                            mark: true,
+                            dataView: {
+                                readOnly: false
+                            },
+                            magicType: ['line', 'bar'],
+                            restore: true,
+                            saveAsImage: true
+                        }
+                    },
+                    calculable: true,
+                    legend: {
+                        data: ['贸易额', '通报次数']
+
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        data: ['2006', '2007', '2008', '2009', '2011', '2012']
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        name: '贸易额',
+                        axisLabel: {
+                            formatter: '{value} 亿美元'
+                        },
+                        splitLine: {
+                            show: false
+                        }
+                    },
+                    {
+                        type: 'value',
+                        name: '通报次数',
+                        axisLabel: {
+                            formatter: '{value} 次'
+                        },
+                        splitArea: {
+                            show: true
+                        }
+                    },
+                    ],
+                    series: [{
+                        name: '贸易额',
+                        type: 'bar',
+                        data: [276, 268, 372, 355, 437, 525, 476]
+                    },
+
+                    {
+                        name: '通报次数',
+                        type: 'line',
+                        yAxisIndex: 1,
+                        data: [2, 21, 49, 204, 286, 196, 300]
+                    },
+                    ]
+                };
+
+                myChart1.setOption(option1);
+                myChart2.setOption(option2);
+                myChart3.setOption(option3);
+            });
+        </script>
+		
+		
+<div id="demo">
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="example" width="100%">
+	<thead>
+		<tr>
+			<th>Rendering engine</th>
+			<th>Browser</th>
+			<th>Platform(s)</th>
+			<th>Engine version</th>
+			<th>CSS grade</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr class="odd gradeX">
+			<td>Trident</td>
+			<td>Internet
+				 Explorer 4.0</td>
+			<td>Win 95+</td>
+			<td class="center"> 4</td>
+			<td class="center">X</td>
+		</tr>
+		<tr class="even gradeC">
+			<td>Trident</td>
+			<td>Internet
+				 Explorer 5.0</td>
+			<td>Win 95+</td>
+			<td class="center">5</td>
+			<td class="center">C</td>
+		</tr>
+	</tbody>
+	<tfoot>
+		<tr>
+			<th>Rendering engine</th>
+			<th>Browser</th>
+			<th>Platform(s)</th>
+			<th>Engine version</th>
+			<th>CSS grade</th>
+		</tr>
+	</tfoot>
+</table>
+		
+			
+
+    </body>
+
+</html>
